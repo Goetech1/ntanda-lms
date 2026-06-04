@@ -196,3 +196,12 @@ p { margin-bottom: 1rem; line-height: 1.6; color: var(--text-muted); }
     display: flex !important;
   }
 }
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.3s ease-out forwards;
+}
