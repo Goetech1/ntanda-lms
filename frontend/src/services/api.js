@@ -124,6 +124,18 @@ export const tenantService = {
   updateTenantProfile: (data) => api.patch('/tenant', data)
 };
 
+export const roleService = {
+  getAll: () => api.get('/roles'),
+  create: (data) => api.post('/roles', data),
+  update: (id, data) => api.patch(`/roles/${id}`, data),
+  delete: (id) => api.delete(`/roles/${id}`),
+  assignPermissions: (id, data) => api.post(`/roles/${id}/permissions`, data)
+};
+
+export const permissionService = {
+  getAll: () => api.get('/permissions')
+};
+
 export const institutionService = {
   getCurrent: () => api.get('/institutions/current'),
   updateCurrent: (data) => api.patch('/institutions/current', data)

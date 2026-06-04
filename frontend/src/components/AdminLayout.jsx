@@ -26,6 +26,7 @@ const AdminLayout = () => {
     { name: 'Organization', path: '/admin/organization', icon: '🏢' },
     { name: 'Courses', path: '/admin/courses', icon: '📚' },
     { name: 'Users', path: '/admin/users', icon: '👥' },
+    { name: 'Security', path: '/admin/security', icon: '🔒' },
     { name: 'Settings', path: '/admin/settings', icon: '⚙️' }
   ];
 
