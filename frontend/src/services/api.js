@@ -114,7 +114,9 @@ export const paymentService = {
 };
 
 export const userService = {
-  getAllUsers: () => api.get('/users')
+  getAllUsers: () => api.get('/users'),
+  createUser: (data) => api.post('/users', data),
+  deleteUser: (id) => api.delete(`/users/${id}`)
 };
 
 export const tenantService = {
