@@ -29,6 +29,20 @@ const Login = () => {
     }
   };
 
+  const handleDemoLogin = (role = 'STUDENT') => {
+    const demoUser = {
+      id: "demo-uuid-1234",
+      email: role === 'ADMIN' ? "admin@ntanda.io" : "student@ntanda.io",
+      fullName: role === 'ADMIN' ? "Demo Admin" : "Demo Student",
+      role: role,
+      tenantId: "123e4567-e89b-12d3-a456-426614174000"
+    };
+    
+    setAccessToken("fake-jwt-token-for-demo");
+    localStorage.setItem('user', JSON.stringify(demoUser));
+    navigate('/dashboard');
+  };
+
   return (
     <div style={{ minHeight: '100vh', display: 'flex' }}>
       
@@ -104,9 +118,19 @@ const Login = () => {
               <a href="#" style={{ color: 'var(--primary)', fontSize: '0.875rem', textDecoration: 'none' }}>Forgot Password?</a>
             </div>
 
-            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '1rem' }} disabled={isLoading}>
+            <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '1rem', marginBottom: '1rem' }} disabled={isLoading}>
               {isLoading ? 'Signing In...' : 'Sign In'}
             </button>
+            
+            <div style={{ display: 'flex', gap: '1rem', position: 'relative' }}>
+              <div style={{ position: 'absolute', top: '-1.5rem', left: '0', right: '0', textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)' }}>— OR FOR TESTING —</div>
+              <button type="button" className="btn btn-secondary" style={{ width: '100%', padding: '0.75rem', fontSize: '0.875rem' }} onClick={() => handleDemoLogin('STUDENT')}>
+                Demo Student
+              </button>
+              <button type="button" className="btn btn-secondary" style={{ width: '100%', padding: '0.75rem', fontSize: '0.875rem' }} onClick={() => handleDemoLogin('ADMIN')}>
+                Demo Admin
+              </button>
+            </div>
           </form>
 
           <p style={{ textAlign: 'center', marginTop: '2.5rem', fontSize: '0.875rem' }}>
