@@ -25,9 +25,11 @@ const AdminLayout = () => {
     { name: 'Overview', path: '/admin', icon: '📊' },
     { name: 'Organization', path: '/admin/organization', icon: '🏢' },
     { name: 'Courses', path: '/admin/courses', icon: '📚' },
+    { name: 'Assessments', path: '/admin/assessments', icon: '📝' },
     { name: 'Live Classes', path: '/admin/live-classes', icon: '📹' },
     { name: 'AI Studio', path: '/admin/ai-studio', icon: '✨' },
-    { name: 'Users', path: '/admin/users', icon: '👥' },
+    { name: 'Students', path: '/admin/students', icon: '🎓' },
+    { name: 'Staff Users', path: '/admin/users', icon: '👥' },
     { name: 'Security', path: '/admin/security', icon: '🔒' },
     { name: 'Settings', path: '/admin/settings', icon: '⚙️' }
   ];
@@ -68,7 +70,7 @@ const AdminLayout = () => {
           </div>
 
           {/* Nav Links */}
-          <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem', overflowY: 'auto', paddingRight: '0.5rem' }}>
             {navItems.map(item => {
               const isActive = location.pathname === item.path || (item.path !== '/admin' && location.pathname.startsWith(item.path));
               return (

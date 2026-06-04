@@ -130,6 +130,24 @@ export const aiService = {
   getRecommendations: () => api.get('/v1/ai/recommendations')
 };
 
+export const assessmentService = {
+  getAll: () => api.get('/assessments'),
+  create: (data) => api.post('/assessments', data),
+  addQuestion: (id, data) => api.post(`/assessments/${id}/questions`, data)
+};
+
+export const examService = {
+  schedule: (data) => api.post('/v1/exams', data),
+  getByCourse: (courseId) => api.get(`/v1/exams/course/${courseId}`)
+};
+
+export const studentService = {
+  getAll: () => api.get('/students'),
+  getById: (id) => api.get(`/students/${id}`),
+  create: (data) => api.post('/students', data),
+  update: (id, data) => api.patch(`/students/${id}`, data)
+};
+
 export const virtualClassroomService = {
   getAll: () => api.get('/virtual-classrooms'),
   schedule: (data) => api.post('/virtual-classrooms/schedule', data),
