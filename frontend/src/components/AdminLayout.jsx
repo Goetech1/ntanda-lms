@@ -1,39 +1,25 @@
-import { useEffect, useState } from 'react';
-import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
-import { authService } from '../services/api';
+import { useState, useEffect } from 'react';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { tenantService } from '../../services/api';
 
 const AdminLayout = () => {
-  const navigate = useNavigate();
   const location = useLocation();
-  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
+  const [tenant, setTenant] = useState({ name: 'Ntanda LMS', logoUrl: '/ntanda-logo.jpeg' });
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (!storedUser) {
-      navigate('/login');
-      return;
-    }
-    
-    const parsedUser = JSON.parse(storedUser);
-    if (parsedUser.role !== 'ADMIN') {
-      // Redirect non-admins to the standard dashboard
-      navigate('/dashboard');
-      return;
-    }
-    
-    setUser(parsedUser);
-  }, [navigate]);
-
-  const handleLogout = async () => {
-    try {
-      await authService.logout();
-    } catch (error) {
-      console.error(error);
-    } finally {
-      localStorage.removeItem('user');
-      navigate('/login');
-    }
-  };
+    tenantService.getTenantProfile()
+      .then(res => {
+        const data = res?.data?.data || res?.data;
+        if (data) {
+          setTenant({
+            name: data.name || 'Ntanda LMS',
+            logoUrl: data.branding?.logoUrl || '/ntanda-logo.jpeg'
+          });
+        }
+      })
+      .catch(() => null);
+  }, []);
 
   const navItems = [
     { name: 'Overview', path: '/admin', icon: '📊' },
@@ -42,109 +28,139 @@ const AdminLayout = () => {
     { name: 'Settings', path: '/admin/settings', icon: '⚙️' }
   ];
 
-  if (!user) return null;
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-color)' }}>
       
-      {/* Sidebar */}
-      <aside style={{ 
-        width: '260px', 
-        background: 'var(--card-bg)', 
-        borderRight: '1px solid var(--border-color)', 
+      {/* Floating Sidebar (Apple/Stripe Style) */}
+      <div style={{ 
+        width: '280px', 
+        padding: '1.5rem', 
+        position: 'fixed', 
+        height: '100vh', 
         display: 'flex', 
-        flexDirection: 'column',
-        position: 'fixed',
-        height: '100vh',
-        zIndex: 50
-      }} className="desktop-only-flex">
-        <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center' }}>
-          <img src="/ntanda-logo.jpeg" alt="Ntanda LMS" style={{ height: '60px', borderRadius: '6px', cursor: 'pointer' }} onClick={() => navigate('/')} />
-        </div>
-        
-        <nav style={{ flex: 1, padding: '1.5rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', fontWeight: 'bold', letterSpacing: '1px', marginBottom: '0.5rem', paddingLeft: '1rem' }}>
-            Admin Menu
+        flexDirection: 'column'
+      }}>
+        <div className="glass-panel" style={{ 
+          height: '100%', 
+          display: 'flex', 
+          flexDirection: 'column',
+          padding: '2rem 1.5rem',
+          borderRadius: '24px',
+          boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
+          border: '1px solid rgba(255,255,255,0.05)'
+        }}>
+          {/* Logo Area */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '3rem', padding: '0 0.5rem' }}>
+            <img src={tenant.logoUrl} alt="Logo" style={{ height: '45px', borderRadius: '12px', boxShadow: '0 4px 10px rgba(0,0,0,0.3)' }} />
+            <h2 style={{ margin: 0, fontSize: '1.25rem', background: 'linear-gradient(to right, #fff, #94a3b8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '0.5px' }}>
+              {tenant.name}
+            </h2>
           </div>
-          
-          {navItems.map(item => {
-            const isActive = location.pathname === item.path || (item.path !== '/admin' && location.pathname.startsWith(item.path));
-            return (
-              <Link 
-                key={item.name} 
-                to={item.path} 
-                style={{ 
-                  display: 'flex', alignItems: 'center', gap: '1rem', 
-                  padding: '0.875rem 1rem', borderRadius: '8px',
-                  textDecoration: 'none',
-                  color: isActive ? 'white' : 'var(--text-muted)',
-                  background: isActive ? 'var(--primary)' : 'transparent',
-                  fontWeight: isActive ? '600' : '400',
-                  transition: 'all 0.2s'
-                }}
-              >
-                <span>{item.icon}</span>
-                {item.name}
-              </Link>
-            );
-          })}
-        </nav>
-        
-        <div style={{ padding: '1.5rem', borderTop: '1px solid var(--border-color)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-            <div style={{ width: '40px', height: '60px', borderRadius: '50%', background: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
-              {user.fullName ? user.fullName[0].toUpperCase() : user.email[0].toUpperCase()}
-            </div>
-            <div style={{ overflow: 'hidden' }}>
-              <div style={{ fontWeight: '600', fontSize: '0.875rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{user.fullName || 'Admin User'}</div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Admin</div>
-            </div>
+
+          {/* Nav Links */}
+          <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {navItems.map(item => {
+              const isActive = location.pathname === item.path || (item.path !== '/admin' && location.pathname.startsWith(item.path));
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: '1rem',
+                    padding: '1rem 1.25rem', borderRadius: '14px',
+                    color: isActive ? '#fff' : 'var(--text-muted)',
+                    background: isActive ? 'linear-gradient(90deg, rgba(255,255,255,0.08) 0%, transparent 100%)' : 'transparent',
+                    borderLeft: isActive ? '3px solid var(--primary)' : '3px solid transparent',
+                    fontWeight: isActive ? '600' : '500',
+                    transition: 'all 0.2s ease',
+                    textDecoration: 'none'
+                  }}
+                  onMouseEnter={e => {
+                    if (!isActive) e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                  }}
+                  onMouseLeave={e => {
+                    if (!isActive) e.currentTarget.style.background = 'transparent';
+                  }}
+                >
+                  <span style={{ 
+                    fontSize: '1.2rem', 
+                    filter: isActive ? 'drop-shadow(0 0 8px var(--primary-glow))' : 'grayscale(100%) opacity(0.7)'
+                  }}>{item.icon}</span>
+                  {item.name}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* User Profile / Logout */}
+          <div style={{ marginTop: 'auto', paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+            <button 
+              onClick={handleLogout}
+              style={{ 
+                display: 'flex', alignItems: 'center', gap: '1rem', width: '100%',
+                background: 'transparent', border: 'none', color: 'var(--text-muted)',
+                padding: '1rem 1.25rem', borderRadius: '14px', cursor: 'pointer',
+                textAlign: 'left', fontWeight: '500', transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                e.currentTarget.style.color = '#ef4444';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = 'var(--text-muted)';
+              }}
+            >
+              <span>🚪</span> Logout
+            </button>
           </div>
-          <button onClick={handleLogout} className="btn btn-secondary" style={{ width: '100%', padding: '0.75rem' }}>
-            Logout
-          </button>
         </div>
-      </aside>
+      </div>
 
       {/* Main Content Area */}
-      <div style={{ flex: 1, marginLeft: '260px', display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <div style={{ flex: 1, marginLeft: '280px', display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         
-        {/* Topbar */}
+        {/* Frosted Topbar */}
         <header style={{ 
-          height: '70px', 
-          background: 'rgba(15, 15, 20, 0.9)', 
-          backdropFilter: 'blur(10px)',
-          borderBottom: '1px solid var(--border-color)', 
+          height: '80px', 
           display: 'flex', 
+          justifyContent: 'flex-end', 
           alignItems: 'center', 
-          justifyContent: 'space-between',
-          padding: '0 2rem',
+          padding: '0 3rem',
           position: 'sticky',
           top: 0,
-          zIndex: 40
+          zIndex: 50,
+          background: 'rgba(11, 12, 16, 0.7)',
+          backdropFilter: 'blur(20px)',
+          borderBottom: '1px solid rgba(255,255,255,0.03)'
         }}>
-          <div>
-            <h2 style={{ fontSize: '1.25rem', margin: 0 }}>Workspace</h2>
-          </div>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <div className="input-group" style={{ marginBottom: 0 }}>
-              <input type="text" placeholder="Search..." style={{ padding: '0.5rem 1rem', borderRadius: '999px', background: 'rgba(0,0,0,0.5)', width: '250px' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+            <button style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }} onMouseEnter={e => e.currentTarget.style.background='rgba(255,255,255,0.1)'} onMouseLeave={e => e.currentTarget.style.background='rgba(255,255,255,0.05)'}>
+              🔔
+            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.5rem 1rem', background: 'rgba(255,255,255,0.03)', borderRadius: '99px', border: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer' }}>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '0.875rem', fontWeight: '600', color: '#fff' }}>Admin User</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--primary)' }}>Platform Admin</div>
+              </div>
+              <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary), var(--secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', color: '#fff', boxShadow: '0 2px 10px var(--primary-glow)' }}>
+                AU
+              </div>
             </div>
-            <button style={{ background: 'transparent', border: 'none', color: 'var(--text-muted)', fontSize: '1.25rem', cursor: 'pointer' }}>🔔</button>
           </div>
         </header>
 
-        {/* Dynamic Page Content */}
-        <main className="animate-fade-in" style={{ padding: '2rem', flex: 1, overflowY: 'auto' }}>
+        {/* Page Content */}
+        <main className="animate-fade-up" style={{ flex: 1, padding: '3rem' }}>
           <Outlet />
         </main>
-        
-        {/* Footer */}
-        <footer style={{ padding: '1rem 2rem', borderTop: '1px solid var(--border-color)', fontSize: '0.875rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between' }}>
-          <span>&copy; {new Date().getFullYear()} Ntanda LMS</span>
-          <span>Version 1.0.0</span>
-        </footer>
+
       </div>
     </div>
   );
