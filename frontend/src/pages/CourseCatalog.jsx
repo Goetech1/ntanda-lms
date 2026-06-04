@@ -28,7 +28,7 @@ const CourseCatalog = () => {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <header style={{ padding: '1rem 2rem', background: 'var(--card-bg)', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 style={{ margin: 0, fontSize: '1.5rem', cursor: 'pointer' }} onClick={() => navigate('/dashboard')}>Ntanda LMS</h2>
+        <img src="/ntanda-logo.jpeg" alt="Ntanda LMS" style={{ height: '40px', borderRadius: '6px', cursor: 'pointer' }} onClick={() => navigate('/dashboard')} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <Link to="/dashboard" className="btn btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}>Dashboard</Link>
         </div>

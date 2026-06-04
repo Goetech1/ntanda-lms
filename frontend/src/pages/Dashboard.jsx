@@ -49,7 +49,7 @@ const Dashboard = () => {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <header style={{ padding: '1rem 2rem', background: 'var(--card-bg)', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 style={{ margin: 0, fontSize: '1.5rem' }}>Ntanda LMS</h2>
+        <img src="/ntanda-logo.jpeg" alt="Ntanda LMS" style={{ height: '40px', borderRadius: '6px' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <Link to="/courses" className="btn btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}>Browse Courses</Link>
           <span style={{ color: 'var(--text-muted)' }}>{user.email}</span>

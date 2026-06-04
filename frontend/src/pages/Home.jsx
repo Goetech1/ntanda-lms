@@ -13,10 +13,7 @@ const Home = () => {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Navigation */}
       <nav style={{ padding: '1.5rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 10 }}>
-        <div style={{ fontSize: '1.75rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--primary)', boxShadow: 'var(--copper-glow)' }}></div>
-          Ntanda LMS
-        </div>
+        <img src="/ntanda-logo.jpeg" alt="Ntanda LMS" style={{ height: '45px', borderRadius: '8px' }} />
         <div style={{ display: 'flex', gap: '1rem' }}>
           <Link to="/courses" className="btn btn-secondary" style={{ border: 'none', background: 'transparent' }}>Browse Courses</Link>
           <Link to="/login" className="btn btn-secondary">Sign In</Link>
@@ -254,10 +251,7 @@ const Home = () => {
         <div className="container">
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '2rem', marginBottom: '3rem' }}>
             <div style={{ maxWidth: '300px' }}>
-              <div style={{ fontSize: '1.5rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-                <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--primary)' }}></div>
-                Ntanda LMS
-              </div>
+              <img src="/ntanda-logo.jpeg" alt="Ntanda LMS" style={{ height: '45px', borderRadius: '8px', marginBottom: '1rem' }} />
               <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Empowering African institutions with next-generation learning management solutions.</p>
             </div>
             

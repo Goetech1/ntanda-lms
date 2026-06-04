@@ -56,9 +56,8 @@ const Login = () => {
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom right, rgba(10,10,10,0.9), rgba(16, 185, 129, 0.2))' }}></div>
         
         <div style={{ position: 'relative', zIndex: 2, padding: '4rem', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: '100%' }}>
-          <Link to="/" style={{ textDecoration: 'none', color: 'var(--text-main)', fontSize: '1.75rem', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--primary)', boxShadow: 'var(--copper-glow)' }}></div>
-            Ntanda LMS
+          <Link to="/">
+            <img src="/ntanda-logo.jpeg" alt="Ntanda LMS" style={{ height: '45px', borderRadius: '8px' }} />
           </Link>
 
           <div>
@@ -74,10 +73,8 @@ const Login = () => {
       <div style={{ flex: '1 1 50%', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem', background: 'var(--bg-color)' }}>
         <div className="animate-fade-in" style={{ width: '100%', maxWidth: '450px' }}>
           
-          {/* Mobile Logo */}
-          <Link to="/" style={{ textDecoration: 'none', color: 'var(--text-main)', fontSize: '1.75rem', fontWeight: '800', alignItems: 'center', gap: '0.5rem', marginBottom: '3rem', justifyContent: 'center' }} className="mobile-only-flex">
-            <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: 'var(--primary)' }}></div>
-            Ntanda LMS
+          <Link to="/" className="mobile-only-flex" style={{ justifyContent: 'center', marginBottom: '3rem' }}>
+            <img src="/ntanda-logo.jpeg" alt="Ntanda LMS" style={{ height: '45px', borderRadius: '8px' }} />
           </Link>
 
           <h2 style={{ marginBottom: '0.5rem', fontSize: '2rem' }}>Welcome Back</h2>
