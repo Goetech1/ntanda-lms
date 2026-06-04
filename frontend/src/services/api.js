@@ -110,4 +110,12 @@ export const paymentService = {
   createStripeCheckout: (courseId, amount) => api.post('/payments/stripe/checkout', { courseId, amount })
 };
 
+export const userService = {
+  getAllUsers: () => api.get('/users')
+};
+
+export const tenantService = {
+  getTenantProfile: () => api.get('/tenant')
+};
+
 export default api;
