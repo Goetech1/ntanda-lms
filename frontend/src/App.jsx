@@ -24,6 +24,13 @@ import AdminSecurity from './pages/admin/AdminSecurity';
 import AdminSettings from './pages/admin/AdminSettings';
 import AdminOrganization from './pages/admin/AdminOrganization';
 
+// Instructor Portal Imports
+import InstructorLayout from './pages/instructor/InstructorLayout';
+import InstructorDashboard from './pages/instructor/InstructorDashboard';
+import InstructorCourses from './pages/instructor/InstructorCourses';
+import InstructorStudents from './pages/instructor/InstructorStudents';
+import InstructorEarnings from './pages/instructor/InstructorEarnings';
+
 // Student Portal Imports
 import StudentLayout from './pages/student/StudentLayout';
 import StudentDashboard from './pages/student/StudentDashboard';
@@ -64,6 +71,14 @@ function App() {
           <Route path="users" element={<AdminUsers />} />
           <Route path="security" element={<AdminSecurity />} />
           <Route path="settings" element={<AdminSettings />} />
+        </Route>
+
+        {/* Instructor Portal Routes */}
+        <Route path="/instructor" element={<InstructorLayout />}>
+          <Route index element={<InstructorDashboard />} />
+          <Route path="courses" element={<InstructorCourses />} />
+          <Route path="students" element={<InstructorStudents />} />
+          <Route path="earnings" element={<InstructorEarnings />} />
         </Route>
 
         {/* Student Portal Routes */}

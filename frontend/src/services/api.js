@@ -186,6 +186,13 @@ export const studentPortalService = {
   getMyCertificates: () => api.get('/certificates/my-certificates')
 };
 
+export const instructorPortalService = {
+  getOverview: () => api.get('/instructors/my-overview'),
+  getMyCourses: () => api.get('/instructors/my-courses'),
+  getMyStudents: () => api.get('/instructors/my-students'),
+  getMyEarnings: () => api.get('/instructors/my-earnings')
+};
+
 export const virtualClassroomService = {
   getAll: () => api.get('/virtual-classrooms'),
   schedule: (data) => api.post('/virtual-classrooms/schedule', data),
