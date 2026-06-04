@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { courseService } from '../../services/api';
 
 const AdminCourses = () => {
+  const navigate = useNavigate();
   const [courses, setCourses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -141,7 +143,7 @@ const AdminCourses = () => {
                     {new Date(course.createdAt).toLocaleDateString()}
                   </td>
                   <td style={{ padding: '1rem', textAlign: 'right' }}>
-                    <button style={{ background: 'transparent', border: 'none', color: 'var(--primary)', cursor: 'pointer', marginRight: '1rem' }}>Edit</button>
+                    <button style={{ background: 'transparent', border: 'none', color: 'var(--primary)', cursor: 'pointer', marginRight: '1rem' }} onClick={() => navigate(`/admin/courses/${course.id}/curriculum`)}>Build Curriculum</button>
                     <button style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer' }} onClick={() => handleDeleteCourse(course.id)}>Delete</button>
                   </td>
                 </tr>

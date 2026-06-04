@@ -123,4 +123,13 @@ export const tenantService = {
   getTenantProfile: () => api.get('/tenant')
 };
 
+export const courseModuleService = {
+  getModulesByCourse: (courseId) => api.get(`/course-modules/by-course/${courseId}`),
+  createModule: (data) => api.post('/course-modules', data)
+};
+
+export const lessonService = {
+  createLesson: (data) => api.post('/lessons', data)
+};
+
 export default api;
