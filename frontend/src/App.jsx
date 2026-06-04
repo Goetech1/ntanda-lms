@@ -23,6 +23,14 @@ import AdminUsers from './pages/admin/AdminUsers';
 import AdminSecurity from './pages/admin/AdminSecurity';
 import AdminSettings from './pages/admin/AdminSettings';
 import AdminOrganization from './pages/admin/AdminOrganization';
+
+// Student Portal Imports
+import StudentLayout from './pages/student/StudentLayout';
+import StudentDashboard from './pages/student/StudentDashboard';
+import CoursePlayer from './pages/student/CoursePlayer';
+import StudentLive from './pages/student/StudentLive';
+import StudentAchievements from './pages/student/StudentAchievements';
+
 import './index.css';
 
 function App() {
@@ -57,6 +65,18 @@ function App() {
           <Route path="security" element={<AdminSecurity />} />
           <Route path="settings" element={<AdminSettings />} />
         </Route>
+
+        {/* Student Portal Routes */}
+        <Route path="/student" element={<StudentLayout />}>
+          <Route index element={<StudentDashboard />} />
+          <Route path="catalog" element={<StudentDashboard />} /> {/* Fallback to dashboard for now */}
+          <Route path="live" element={<StudentLive />} />
+          <Route path="achievements" element={<StudentAchievements />} />
+        </Route>
+        
+        {/* Fullscreen Player Route */}
+        <Route path="/student/player/:id" element={<CoursePlayer />} />
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

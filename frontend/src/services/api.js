@@ -178,6 +178,14 @@ export const operationsService = {
   logAttendance: (data) => api.post('/attendance', data)
 };
 
+export const studentPortalService = {
+  getMyEnrollments: () => api.get('/enrollments/my-enrollments'),
+  getCourseCatalog: () => api.get('/courses'),
+  getCourseDetails: (id) => api.get(`/courses/${id}`),
+  getMyAssessments: (courseId) => api.get(`/assessments/course/${courseId}`),
+  getMyCertificates: () => api.get('/certificates/my-certificates')
+};
+
 export const virtualClassroomService = {
   getAll: () => api.get('/virtual-classrooms'),
   schedule: (data) => api.post('/virtual-classrooms/schedule', data),
