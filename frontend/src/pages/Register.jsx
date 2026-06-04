@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { authService } from '../services/api';
 
 const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -22,9 +24,10 @@ const Register = () => {
     return null;
   };
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
 
     const passwordError = validatePassword(password);
     if (passwordError) {
@@ -34,12 +37,19 @@ const Register = () => {
 
     setIsLoading(true);
 
-    // Mock API call fallback
-    setTimeout(() => {
-      // Mock success
-      navigate('/login');
+    try {
+      await authService.register(name, email, password);
+      
+      setSuccess('Account created successfully! Redirecting to login...');
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
+      
+    } catch (err) {
+      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -50,6 +60,12 @@ const Register = () => {
         {error && (
           <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #ef4444', color: '#ef4444', padding: '0.75rem', borderRadius: '8px', marginBottom: '1.5rem', fontSize: '0.875rem' }}>
             {error}
+          </div>
+        )}
+        
+        {success && (
+          <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10b981', color: '#10b981', padding: '0.75rem', borderRadius: '8px', marginBottom: '1.5rem', fontSize: '0.875rem' }}>
+            {success}
           </div>
         )}
 
@@ -93,7 +109,7 @@ const Register = () => {
             </small>
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }} disabled={isLoading}>
+          <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '1rem' }} disabled={isLoading || success !== ''}>
             {isLoading ? 'Creating Account...' : 'Register'}
           </button>
         </form>

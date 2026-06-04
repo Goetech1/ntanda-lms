@@ -15,6 +15,13 @@ export const setAccessToken = (token) => {
   accessToken = token;
 };
 
+// Helper for tenant resolution (dynamic or env fallback)
+export const getTenantId = () => {
+  // In a real production environment with subdomains, you might resolve the UUID
+  // via an initial API call or inject it. For now, we fallback to the env variable.
+  return import.meta.env.VITE_TENANT_ID;
+};
+
 // Interceptor to attach access token to requests
 api.interceptors.request.use(
   (config) => {
@@ -36,19 +43,20 @@ api.interceptors.response.use(
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
-      originalRequest.url !== '/v1/auth/refresh' &&
-      originalRequest.url !== '/v1/auth/login'
+      originalRequest.url !== '/auth/refresh' &&
+      originalRequest.url !== '/auth/login'
     ) {
       originalRequest._retry = true;
 
       try {
         const response = await axios.post(
-          `${import.meta.env.VITE_API_URL}/v1/auth/refresh`,
+          `${import.meta.env.VITE_API_URL}/auth/refresh`,
           {},
           { withCredentials: true } // Required to send the HttpOnly cookie
         );
 
-        const newAccessToken = response.data.accessToken;
+        // The API contract dictates the token is inside data.data.access_token
+        const newAccessToken = response.data.data.access_token;
         setAccessToken(newAccessToken);
 
         // Update the failed request with the new token
@@ -59,7 +67,7 @@ api.interceptors.response.use(
       } catch (refreshError) {
         // If refresh fails, clear auth state and redirect to login
         setAccessToken(null);
-        // You might want to trigger a global event here or use a hook to handle redirect
+        localStorage.removeItem('user');
         window.location.href = '/login'; // Fallback redirect
         return Promise.reject(refreshError);
       }
@@ -70,10 +78,21 @@ api.interceptors.response.use(
 );
 
 export const authService = {
-  login: (email, password) => api.post('/v1/auth/login', { email, password }),
-  register: (name, email, password) => api.post('/v1/auth/register', { name, email, password }),
-  logout: () => api.post('/v1/auth/logout').then(() => { setAccessToken(null); }),
-  getCurrentUser: () => api.get('/v1/auth/me')
+  login: (email, password) => 
+    api.post('/auth/login', { email, password }, {
+      headers: { 'x-tenant-id': getTenantId() }
+    }),
+    
+  register: (fullName, email, password) => 
+    api.post('/auth/register', { fullName, email, password }, {
+      headers: { 'x-tenant-id': getTenantId() }
+    }),
+    
+  logout: () => 
+    api.post('/auth/logout').then(() => { 
+      setAccessToken(null); 
+      localStorage.removeItem('user');
+    })
 };
 
 export default api;

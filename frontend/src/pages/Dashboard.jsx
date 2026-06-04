@@ -1,23 +1,34 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { authService } from '../services/api';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
-    // Mock authentication check
-    const mockUser = localStorage.getItem('mock_user');
-    if (!mockUser) {
+    // Read the stored user object from Login
+    const storedUser = localStorage.getItem('user');
+    if (!storedUser) {
       navigate('/login');
     } else {
-      setUser(JSON.parse(mockUser));
+      setUser(JSON.parse(storedUser));
     }
   }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('mock_user');
-    navigate('/login');
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await authService.logout();
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Proceed to clear state anyway if the server request fails
+    } finally {
+      // Clear user data completely and redirect
+      localStorage.removeItem('user');
+      navigate('/login');
+    }
   };
 
   if (!user) return null;
@@ -31,16 +42,22 @@ const Dashboard = () => {
           <span style={{ background: 'rgba(79, 70, 229, 0.2)', color: '#818CF8', padding: '0.25rem 0.75rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 'bold' }}>
             {user.role}
           </span>
-          <button onClick={handleLogout} className="btn btn-secondary" style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}>
-            Logout
+          <button 
+            onClick={handleLogout} 
+            className="btn btn-secondary" 
+            style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
+            disabled={isLoggingOut}
+          >
+            {isLoggingOut ? 'Logging out...' : 'Logout'}
           </button>
         </div>
       </header>
 
       <main className="container animate-fade-in" style={{ padding: '2rem', flex: 1 }}>
         <div className="glass-panel" style={{ padding: '2rem' }}>
-          <h3>Dashboard Layout</h3>
-          <p>Welcome back! This is an empty shell for the dashboard. Features will be implemented here once the backend connects.</p>
+          <h3>Welcome, {user.fullName || user.email}!</h3>
+          <p>Your tenant ID is: <code style={{ color: 'var(--text-muted)' }}>{user.tenantId}</code></p>
+          <p>This is an empty shell for the dashboard. Features will be implemented here.</p>
           
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1.5rem', marginTop: '2rem' }}>
             <div className="glass-panel" style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.02)' }}>

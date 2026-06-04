@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { authService, setAccessToken } from '../services/api';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -8,27 +9,25 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
-    // Mock API call fallback since backend is not connected yet
-    setTimeout(() => {
-      if (email === 'user@example.com' && password === 'Password123!') {
-        // Mock success
-        localStorage.setItem('mock_user', JSON.stringify({
-          id: 'mock-uuid',
-          email: 'user@example.com',
-          role: 'STUDENT',
-          tenant_id: 'mock-tenant'
-        }));
-        navigate('/dashboard');
-      } else {
-        setError('Invalid credentials for mock login (Use user@example.com / Password123!)');
-      }
+    try {
+      const response = await authService.login(email, password);
+      // Based on API Contract: response.data.data contains access_token and user
+      const { access_token, user } = response.data.data;
+      
+      setAccessToken(access_token);
+      localStorage.setItem('user', JSON.stringify(user));
+      
+      navigate('/dashboard');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to authenticate. Please check your credentials.');
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
