@@ -40,7 +40,12 @@ const Login = () => {
     
     setAccessToken("fake-jwt-token-for-demo");
     localStorage.setItem('user', JSON.stringify(demoUser));
-    navigate('/dashboard');
+    
+    if (role === 'ADMIN') {
+      navigate('/admin');
+    } else {
+      navigate('/dashboard');
+    }
   };
 
   return (
