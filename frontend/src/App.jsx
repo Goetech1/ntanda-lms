@@ -9,6 +9,7 @@ import AdminLayout from './components/AdminLayout';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminCourses from './pages/admin/AdminCourses';
 import AdminCourseCurriculum from './pages/admin/AdminCourseCurriculum';
+import AdminVirtualClassrooms from './pages/admin/AdminVirtualClassrooms';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminSecurity from './pages/admin/AdminSecurity';
 import AdminSettings from './pages/admin/AdminSettings';
@@ -33,6 +34,7 @@ function App() {
           <Route path="organization" element={<AdminOrganization />} />
           <Route path="courses" element={<AdminCourses />} />
           <Route path="courses/:id/curriculum" element={<AdminCourseCurriculum />} />
+          <Route path="live-classes" element={<AdminVirtualClassrooms />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="security" element={<AdminSecurity />} />
           <Route path="settings" element={<AdminSettings />} />

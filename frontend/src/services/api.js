@@ -124,6 +124,12 @@ export const tenantService = {
   updateTenantProfile: (data) => api.patch('/tenant', data)
 };
 
+export const virtualClassroomService = {
+  getAll: () => api.get('/virtual-classrooms'),
+  schedule: (data) => api.post('/virtual-classrooms/schedule', data),
+  register: (id, data) => api.post(`/virtual-classrooms/${id}/register`, data)
+};
+
 export const roleService = {
   getAll: () => api.get('/roles'),
   create: (data) => api.post('/roles', data),
