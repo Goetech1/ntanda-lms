@@ -110,22 +110,22 @@ export declare class AnalyticsController {
             assessmentCount: number;
             certificatesIssued: number;
             _count: {
+                certificates: number;
                 enrollments: number;
                 assessments: number;
-                certificates: number;
             };
             instructor: {
                 fullName: string;
             };
             id: string;
-            description: string;
-            createdAt: Date;
             tenantId: string;
+            createdAt: Date;
             updatedAt: Date;
             status: import(".prisma/client").$Enums.CourseStatus;
             deletedAt: Date | null;
             instructorId: string;
             title: string;
+            description: string;
             thumbnailUrl: string | null;
             price: import("@prisma/client/runtime/library").Decimal;
             categoryId: string | null;

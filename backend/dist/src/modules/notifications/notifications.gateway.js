@@ -12,6 +12,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 var NotificationsGateway_1;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NotificationsGateway = void 0;
 const websockets_1 = require("@nestjs/websockets");
@@ -80,14 +81,14 @@ let NotificationsGateway = NotificationsGateway_1 = class NotificationsGateway {
 exports.NotificationsGateway = NotificationsGateway;
 __decorate([
     (0, websockets_1.WebSocketServer)(),
-    __metadata("design:type", socket_io_1.Server)
+    __metadata("design:type", typeof (_a = typeof socket_io_1.Server !== "undefined" && socket_io_1.Server) === "function" ? _a : Object)
 ], NotificationsGateway.prototype, "server", void 0);
 __decorate([
     (0, websockets_1.SubscribeMessage)('mark_read'),
     __param(0, (0, websockets_1.ConnectedSocket)()),
     __param(1, (0, websockets_1.MessageBody)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
+    __metadata("design:paramtypes", [typeof (_b = typeof socket_io_1.Socket !== "undefined" && socket_io_1.Socket) === "function" ? _b : Object, Object]),
     __metadata("design:returntype", void 0)
 ], NotificationsGateway.prototype, "handleMarkRead", null);
 exports.NotificationsGateway = NotificationsGateway = NotificationsGateway_1 = __decorate([

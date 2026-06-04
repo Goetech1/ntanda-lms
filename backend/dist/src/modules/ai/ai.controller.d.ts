@@ -6,12 +6,6 @@ export declare class AiController {
         question: string;
         courseId?: string;
     }): Promise<{
-        answer: string;
-        tokensUsed: number;
-        questions?: undefined;
-        recommendations?: undefined;
-        result?: undefined;
-    } | {
         questions: any;
         tokensUsed: number;
         answer?: undefined;
@@ -29,18 +23,15 @@ export declare class AiController {
         answer?: undefined;
         questions?: undefined;
         recommendations?: undefined;
+    } | {
+        answer: any;
+        tokensUsed: any;
     }>;
     generateQuiz(req: any, body: {
         topic: string;
         questionCount?: number;
         difficulty?: string;
     }): Promise<{
-        answer: string;
-        tokensUsed: number;
-        questions?: undefined;
-        recommendations?: undefined;
-        result?: undefined;
-    } | {
         questions: any;
         tokensUsed: number;
         answer?: undefined;
@@ -58,14 +49,17 @@ export declare class AiController {
         answer?: undefined;
         questions?: undefined;
         recommendations?: undefined;
+    } | {
+        answer: string;
+        tokensUsed: number;
+        questions?: undefined;
+        recommendations?: undefined;
+        result?: undefined;
+    } | {
+        questions: any[];
+        tokensUsed: any;
     }>;
     getRecommendations(req: any): Promise<{
-        answer: string;
-        tokensUsed: number;
-        questions?: undefined;
-        recommendations?: undefined;
-        result?: undefined;
-    } | {
         questions: any;
         tokensUsed: number;
         answer?: undefined;
@@ -83,8 +77,26 @@ export declare class AiController {
         answer?: undefined;
         questions?: undefined;
         recommendations?: undefined;
+    } | {
+        answer: string;
+        tokensUsed: number;
+        questions?: undefined;
+        recommendations?: undefined;
+        result?: undefined;
     } | {
         recommendations: any[];
         message: string;
+        tokensUsed?: undefined;
+    } | {
+        recommendations: {
+            id: string;
+            description: string;
+            title: string;
+            category: {
+                name: string;
+            };
+        }[];
+        tokensUsed: any;
+        message?: undefined;
     }>;
 }
