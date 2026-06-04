@@ -59,7 +59,7 @@ const AdminLayout = () => {
         zIndex: 50
       }} className="desktop-only-flex">
         <div style={{ padding: '1.5rem 2rem', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center' }}>
-          <img src="/ntanda-logo.jpeg" alt="Ntanda LMS" style={{ height: '40px', borderRadius: '6px', cursor: 'pointer' }} onClick={() => navigate('/')} />
+          <img src="/ntanda-logo.jpeg" alt="Ntanda LMS" style={{ height: '60px', borderRadius: '6px', cursor: 'pointer' }} onClick={() => navigate('/')} />
         </div>
         
         <nav style={{ flex: 1, padding: '1.5rem 1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -92,7 +92,7 @@ const AdminLayout = () => {
         
         <div style={{ padding: '1.5rem', borderTop: '1px solid var(--border-color)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
+            <div style={{ width: '40px', height: '60px', borderRadius: '50%', background: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold' }}>
               {user.fullName ? user.fullName[0].toUpperCase() : user.email[0].toUpperCase()}
             </div>
             <div style={{ overflow: 'hidden' }}>

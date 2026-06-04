@@ -13,7 +13,7 @@ const Home = () => {
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Navigation */}
       <nav style={{ padding: '1.5rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 10 }}>
-        <img src="/ntanda-logo.jpeg" alt="Ntanda LMS" style={{ height: '45px', borderRadius: '8px' }} />
+        <img src="/ntanda-logo.jpeg" alt="Ntanda LMS" style={{ height: '70px', borderRadius: '8px' }} />
         <div style={{ display: 'flex', gap: '1rem' }}>
           <Link to="/courses" className="btn btn-secondary" style={{ border: 'none', background: 'transparent' }}>Browse Courses</Link>
           <Link to="/login" className="btn btn-secondary">Sign In</Link>
@@ -251,7 +251,7 @@ const Home = () => {
         <div className="container">
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', gap: '2rem', marginBottom: '3rem' }}>
             <div style={{ maxWidth: '300px' }}>
-              <img src="/ntanda-logo.jpeg" alt="Ntanda LMS" style={{ height: '45px', borderRadius: '8px', marginBottom: '1rem' }} />
+              <img src="/ntanda-logo.jpeg" alt="Ntanda LMS" style={{ height: '70px', borderRadius: '8px', marginBottom: '1rem' }} />
               <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Empowering African institutions with next-generation learning management solutions.</p>
             </div>
             

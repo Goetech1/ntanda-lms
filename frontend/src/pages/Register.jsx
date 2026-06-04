@@ -66,7 +66,7 @@ const Register = () => {
         
         <div style={{ position: 'relative', zIndex: 2, padding: '4rem', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: '100%' }}>
           <Link to="/">
-            <img src="/ntanda-logo.jpeg" alt="Ntanda LMS" style={{ height: '45px', borderRadius: '8px' }} />
+            <img src="/ntanda-logo.jpeg" alt="Ntanda LMS" style={{ height: '70px', borderRadius: '8px' }} />
           </Link>
 
           <div>
@@ -83,7 +83,7 @@ const Register = () => {
         <div className="animate-fade-in" style={{ width: '100%', maxWidth: '450px' }}>
           
           <Link to="/" className="mobile-only-flex" style={{ justifyContent: 'center', marginBottom: '3rem' }}>
-            <img src="/ntanda-logo.jpeg" alt="Ntanda LMS" style={{ height: '45px', borderRadius: '8px' }} />
+            <img src="/ntanda-logo.jpeg" alt="Ntanda LMS" style={{ height: '70px', borderRadius: '8px' }} />
           </Link>
 
           <h2 style={{ marginBottom: '0.5rem', fontSize: '2rem' }}>Create Account</h2>
