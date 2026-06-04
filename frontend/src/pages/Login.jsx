@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authService, setAccessToken } from '../services/api';
-import illustration from '../assets/login_illustration.png';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -37,7 +36,7 @@ const Login = () => {
       <div style={{ 
         flex: '1 1 50%', 
         position: 'relative',
-        background: `url(${illustration}) center/cover no-repeat`
+        background: `url('https://images.unsplash.com/photo-1531545514251-b159ce8bf590?q=80&w=1400&auto=format&fit=crop') center/cover no-repeat`
       }} className="desktop-only-flex">
         
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom right, rgba(10,10,10,0.9), rgba(16, 185, 129, 0.2))' }}></div>
