@@ -179,3 +179,20 @@ p { margin-bottom: 1rem; line-height: 1.6; color: var(--text-muted); }
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
+
+/* Responsive Utilities */
+.desktop-only-flex {
+  display: flex;
+}
+.mobile-only-flex {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .desktop-only-flex {
+    display: none !important;
+  }
+  .mobile-only-flex {
+    display: flex !important;
+  }
+}
