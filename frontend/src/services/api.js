@@ -95,4 +95,19 @@ export const authService = {
     })
 };
 
+export const courseService = {
+  getAllCourses: () => api.get('/courses'),
+  getCourseById: (id) => api.get(`/courses/${id}`)
+};
+
+export const enrollmentService = {
+  getMyEnrollments: () => api.get('/enrollments/my-enrollments'),
+  // Admin manual enrollment (temporarily used for testing without Stripe)
+  manualEnroll: (userId, courseId) => api.post('/enrollments', { userId, courseId })
+};
+
+export const paymentService = {
+  createStripeCheckout: (courseId, amount) => api.post('/payments/stripe/checkout', { courseId, amount })
+};
+
 export default api;
