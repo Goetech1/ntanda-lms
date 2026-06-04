@@ -10,6 +10,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminCourses from './pages/admin/AdminCourses';
 import AdminCourseCurriculum from './pages/admin/AdminCourseCurriculum';
 import AdminVirtualClassrooms from './pages/admin/AdminVirtualClassrooms';
+import AdminAIStudio from './pages/admin/AdminAIStudio';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminSecurity from './pages/admin/AdminSecurity';
 import AdminSettings from './pages/admin/AdminSettings';
@@ -35,6 +36,7 @@ function App() {
           <Route path="courses" element={<AdminCourses />} />
           <Route path="courses/:id/curriculum" element={<AdminCourseCurriculum />} />
           <Route path="live-classes" element={<AdminVirtualClassrooms />} />
+          <Route path="ai-studio" element={<AdminAIStudio />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="security" element={<AdminSecurity />} />
           <Route path="settings" element={<AdminSettings />} />
