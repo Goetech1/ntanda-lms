@@ -120,7 +120,8 @@ export const userService = {
 };
 
 export const tenantService = {
-  getTenantProfile: () => api.get('/tenant')
+  getTenantProfile: () => api.get('/tenant'),
+  updateTenantProfile: (data) => api.patch('/tenant', data)
 };
 
 export const courseModuleService = {
