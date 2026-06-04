@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { tenantService } from '../../services/api';
+import { tenantService } from '../services/api';
 
 const AdminLayout = () => {
   const location = useLocation();
