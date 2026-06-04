@@ -11,6 +11,7 @@ import AdminCourses from './pages/admin/AdminCourses';
 import AdminCourseCurriculum from './pages/admin/AdminCourseCurriculum';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminSettings from './pages/admin/AdminSettings';
+import AdminOrganization from './pages/admin/AdminOrganization';
 import './index.css';
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminDashboard />} />
+          <Route path="organization" element={<AdminOrganization />} />
           <Route path="courses" element={<AdminCourses />} />
           <Route path="courses/:id/curriculum" element={<AdminCourseCurriculum />} />
           <Route path="users" element={<AdminUsers />} />

@@ -124,6 +124,32 @@ export const tenantService = {
   updateTenantProfile: (data) => api.patch('/tenant', data)
 };
 
+export const institutionService = {
+  getCurrent: () => api.get('/institutions/current'),
+  updateCurrent: (data) => api.patch('/institutions/current', data)
+};
+
+export const departmentService = {
+  getAll: () => api.get('/departments'),
+  create: (data) => api.post('/departments', data),
+  update: (id, data) => api.patch(`/departments/${id}`, data),
+  delete: (id) => api.delete(`/departments/${id}`)
+};
+
+export const sessionService = {
+  getAll: () => api.get('/academic-sessions'),
+  create: (data) => api.post('/academic-sessions', data),
+  activate: (id) => api.patch(`/academic-sessions/${id}/activate`),
+  delete: (id) => api.delete(`/academic-sessions/${id}`)
+};
+
+export const categoryService = {
+  getAll: () => api.get('/course-categories'),
+  create: (data) => api.post('/course-categories', data),
+  update: (id, data) => api.patch(`/course-categories/${id}`, data),
+  delete: (id) => api.delete(`/course-categories/${id}`)
+};
+
 export const courseModuleService = {
   getModulesByCourse: (courseId) => api.get(`/course-modules/by-course/${courseId}`),
   createModule: (data) => api.post('/course-modules', data)
