@@ -13,6 +13,12 @@ import AdminVirtualClassrooms from './pages/admin/AdminVirtualClassrooms';
 import AdminAIStudio from './pages/admin/AdminAIStudio';
 import AdminAssessments from './pages/admin/AdminAssessments';
 import AdminStudents from './pages/admin/AdminStudents';
+import AdminFinancials from './pages/admin/AdminFinancials';
+import AdminInstructors from './pages/admin/AdminInstructors';
+import AdminLibrary from './pages/admin/AdminLibrary';
+import AdminCommunications from './pages/admin/AdminCommunications';
+import AdminCertificates from './pages/admin/AdminCertificates';
+import AdminOperations from './pages/admin/AdminOperations';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminSecurity from './pages/admin/AdminSecurity';
 import AdminSettings from './pages/admin/AdminSettings';
@@ -41,6 +47,12 @@ function App() {
           <Route path="live-classes" element={<AdminVirtualClassrooms />} />
           <Route path="ai-studio" element={<AdminAIStudio />} />
           <Route path="students" element={<AdminStudents />} />
+          <Route path="financials" element={<AdminFinancials />} />
+          <Route path="instructors" element={<AdminInstructors />} />
+          <Route path="library" element={<AdminLibrary />} />
+          <Route path="communications" element={<AdminCommunications />} />
+          <Route path="certificates" element={<AdminCertificates />} />
+          <Route path="operations" element={<AdminOperations />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="security" element={<AdminSecurity />} />
           <Route path="settings" element={<AdminSettings />} />

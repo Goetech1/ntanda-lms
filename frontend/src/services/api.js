@@ -148,6 +148,36 @@ export const studentService = {
   update: (id, data) => api.patch(`/students/${id}`, data)
 };
 
+export const financialService = {
+  getPayments: () => api.get('/payments'),
+  getSubscriptions: () => api.get('/subscriptions')
+};
+
+export const instructorService = {
+  getAll: () => api.get('/instructors')
+};
+
+export const libraryService = {
+  getAll: () => api.get('/library'),
+  upload: (data) => api.post('/library/upload', data)
+};
+
+export const communicationService = {
+  getAnnouncements: () => api.get('/notifications'),
+  sendAnnouncement: (data) => api.post('/notifications', data),
+  getPages: () => api.get('/cms')
+};
+
+export const certificateService = {
+  getAll: () => api.get('/certificates'),
+  issue: (data) => api.post('/certificates/issue', data)
+};
+
+export const operationsService = {
+  batchEnroll: (data) => api.post('/enrollments/batch', data),
+  logAttendance: (data) => api.post('/attendance', data)
+};
+
 export const virtualClassroomService = {
   getAll: () => api.get('/virtual-classrooms'),
   schedule: (data) => api.post('/virtual-classrooms/schedule', data),

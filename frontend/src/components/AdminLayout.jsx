@@ -29,6 +29,12 @@ const AdminLayout = () => {
     { name: 'Live Classes', path: '/admin/live-classes', icon: '📹' },
     { name: 'AI Studio', path: '/admin/ai-studio', icon: '✨' },
     { name: 'Students', path: '/admin/students', icon: '🎓' },
+    { name: 'Financials', path: '/admin/financials', icon: '💰' },
+    { name: 'Instructors', path: '/admin/instructors', icon: '🧑‍🏫' },
+    { name: 'Library', path: '/admin/library', icon: '📚' },
+    { name: 'Communications', path: '/admin/communications', icon: '📢' },
+    { name: 'Certificates', path: '/admin/certificates', icon: '🏅' },
+    { name: 'Operations', path: '/admin/operations', icon: '📝' },
     { name: 'Staff Users', path: '/admin/users', icon: '👥' },
     { name: 'Security', path: '/admin/security', icon: '🔒' },
     { name: 'Settings', path: '/admin/settings', icon: '⚙️' }
