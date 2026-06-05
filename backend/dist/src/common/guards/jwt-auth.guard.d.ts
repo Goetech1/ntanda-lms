@@ -1,1 +1,0 @@
-export { JwtAuthGuard } from '../../modules/auth/guards/jwt-auth.guard';
