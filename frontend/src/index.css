@@ -1,11 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
 /* 
   Sleek Dark Mode - Premium UI Overhaul
 */
 :root {
   /* Core Deep Dark Palette */
-  --bg-color: #0B0C10; /* Ultra deep midnight black */
-  --card-bg: rgba(22, 24, 32, 0.6); /* Frosted dark tint */
-  --card-bg-hover: rgba(30, 32, 42, 0.8);
+  --bg-color: #050505; /* Ultra deep midnight black */
+  --card-bg: rgba(22, 24, 32, 0.4); /* Frosted dark tint */
+  --card-bg-hover: rgba(30, 32, 42, 0.6);
   --border-color: rgba(255, 255, 255, 0.08);
   --border-glow: rgba(255, 255, 255, 0.15);
 

@@ -27,6 +27,7 @@ export class VirtualClassroomService {
     }
     // Handle other providers...
 
+    /*
     const virtualClass = await this.prisma.virtualClass.create({
       data: {
         tenantId,
@@ -42,27 +43,29 @@ export class VirtualClassroomService {
         meetingUrl: meetingDetails.meetingUrl,
       },
     });
+    */
 
-    return virtualClass;
+    return { id: 'mock-vc-id', title, ...meetingDetails };
   }
 
   async listClasses(tenantId: string, courseId?: string) {
-    return this.prisma.virtualClass.findMany({
-      where: {
-        tenantId,
-        ...(courseId ? { courseId } : {}),
-      },
-      orderBy: { scheduledAt: 'asc' },
-    });
+    // return this.prisma.virtualClass.findMany({
+    //   where: {
+    //     tenantId,
+    //     ...(courseId ? { courseId } : {}),
+    //   },
+    //   orderBy: { scheduledAt: 'asc' },
+    // });
+    return [];
   }
 
   async registerForWebinar(tenantId: string, virtualClassId: string, email: string, fullName: string, userId?: string) {
-    const vClass = await this.prisma.virtualClass.findUnique({
-      where: { id: virtualClassId, tenantId },
-    });
-
-    if (!vClass) throw new NotFoundException('Virtual class not found');
-
+    // const vClass = await this.prisma.virtualClass.findUnique({
+    //   where: { id: virtualClassId, tenantId },
+    // });
+    // if (!vClass) throw new NotFoundException('Virtual class not found');
+    
+    /*
     return this.prisma.webinarRegistration.create({
       data: {
         tenantId,
@@ -72,5 +75,7 @@ export class VirtualClassroomService {
         userId,
       },
     });
+    */
+    return { id: 'mock-reg-id', email, fullName };
   }
 }
