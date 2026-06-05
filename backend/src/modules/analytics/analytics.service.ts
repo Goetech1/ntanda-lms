@@ -612,4 +612,23 @@ export class AnalyticsService {
       certificatesIssued: certificates,
     };
   }
+
+  // ─────────────────────────────────────────────────────────────────────────────
+  // SUPER ADMIN ANALYTICS
+  // ─────────────────────────────────────────────────────────────────────────────
+  async getSuperAdminDashboard() {
+    const [tenants, users, revenue, subscriptions] = await Promise.all([
+      prisma.tenant.count({ where: { status: 'ACTIVE' } }),
+      prisma.user.count({ where: { deletedAt: null } }),
+      prisma.payment.aggregate({ where: { status: 'COMPLETED' }, _sum: { amount: true } }),
+      prisma.subscription.count({ where: { status: 'ACTIVE' } }),
+    ]);
+
+    return {
+      totalTenants: tenants,
+      totalUsers: users,
+      totalRevenue: Number(revenue._sum.amount ?? 0),
+      activeSubscriptions: subscriptions,
+    };
+  }
 }

@@ -5,6 +5,8 @@ import { AnalyticsService } from './analytics.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../auth/guards/permissions.guard';
 import { RequirePermissions } from '../auth/decorators/require-permissions.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 /**
  * Analytics Controller
@@ -97,5 +99,18 @@ export class AnalyticsController {
   @Get('institution')
   getInstitutionAnalytics(@Req() req: any) {
     return this.analyticsService.getInstitutionAnalytics(req.tenantId);
+  }
+
+  // ── Super Admin Analytics ────────────────────────────────────────────────────
+  /**
+   * GET /api/v1/analytics/superadmin/dashboard
+   * Returns global system stats across all tenants.
+   * Requires SUPER_ADMIN role.
+   */
+  @Get('superadmin/dashboard')
+  @UseGuards(RolesGuard)
+  @Roles('SUPER_ADMIN')
+  getSuperAdminDashboard() {
+    return this.analyticsService.getSuperAdminDashboard();
   }
 }
