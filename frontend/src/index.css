@@ -7,25 +7,25 @@
   Sleek Dark Mode - Premium UI Overhaul
 */
 :root {
-  /* Core Deep Dark Palette */
-  --bg-color: #050505; /* Ultra deep midnight black */
-  --card-bg: rgba(22, 24, 32, 0.4); /* Frosted dark tint */
-  --card-bg-hover: rgba(30, 32, 42, 0.6);
-  --border-color: rgba(255, 255, 255, 0.08);
-  --border-glow: rgba(255, 255, 255, 0.15);
+  /* Core Academic Light Palette */
+  --bg-color: #FAF9F6; /* Ivory cream */
+  --card-bg: #FFFFFF; /* Pure white cards */
+  --card-bg-hover: #FCFBFA;
+  --border-color: rgba(0, 33, 71, 0.08);
+  --border-glow: rgba(0, 33, 71, 0.15);
 
-  /* Vibrant Accents */
-  --primary: #00e5ff;
-  --primary-hover: rgba(0, 229, 255, 0.8);
-  --primary-glow: rgba(0, 229, 255, 0.3);
-  --secondary: #ff3366;
-  --secondary-glow: rgba(255, 51, 102, 0.3);
+  /* Vibrant Accents (Navy & Gold) */
+  --primary: #002147; /* Oxford Navy Blue */
+  --primary-hover: #001229;
+  --primary-glow: rgba(0, 33, 71, 0.15);
+  --secondary: #C49A45; /* Gold */
+  --secondary-glow: rgba(196, 154, 69, 0.15);
 
   /* Typography */
-  --text-primary: #f8fafc;
-  --text-muted: #94a3b8;
+  --text-primary: #1E1E1E; /* Charcoal dark */
+  --text-muted: #5A5A5A;
   
-  --font-heading: 'Outfit', sans-serif;
+  --font-heading: 'Lora', Georgia, serif;
   --font-body: 'Inter', sans-serif;
 }
 
@@ -43,15 +43,15 @@ body {
   
   /* Subtle global mesh gradient background */
   background-image: 
-    radial-gradient(circle at 15% 50%, rgba(0, 229, 255, 0.03), transparent 25%),
-    radial-gradient(circle at 85% 30%, rgba(255, 51, 102, 0.03), transparent 25%);
+    radial-gradient(circle at 15% 50%, rgba(0, 33, 71, 0.015), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(196, 154, 69, 0.015), transparent 25%);
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-heading);
-  font-weight: 600;
-  color: #fff;
-  letter-spacing: -0.02em;
+  font-weight: 655;
+  color: #1E1E1E;
+  letter-spacing: -0.01em;
 }
 
 a {
@@ -205,10 +205,10 @@ tbody tr:hover {
   transform: scale(1.002);
 }
 
-/* Harvard-inspired Academic Theme Overrides & Styles for Home Page */
+/* Blue Academic Theme Overrides & Styles for Home Page */
 .academic-theme {
-  --academic-crimson: #A51C30;
-  --academic-crimson-hover: #801424;
+  --academic-navy: #002147;
+  --academic-navy-hover: #001229;
   --academic-gold: #C49A45;
   --academic-cream: #FAF9F6;
   --academic-cream-dark: #F3F1EC;
@@ -220,16 +220,16 @@ tbody tr:hover {
   font-family: 'Lora', Georgia, serif !important;
 }
 
-.bg-academic-crimson {
-  background-color: #A51C30 !important;
+.bg-academic-navy {
+  background-color: #002147 !important;
 }
 
-.bg-academic-crimson-hover:hover {
-  background-color: #801424 !important;
+.bg-academic-navy-hover:hover {
+  background-color: #001229 !important;
 }
 
-.text-academic-crimson {
-  color: #A51C30 !important;
+.text-academic-navy {
+  color: #002147 !important;
 }
 
 .text-academic-charcoal {
@@ -240,8 +240,8 @@ tbody tr:hover {
   color: #C49A45 !important;
 }
 
-.border-academic-crimson {
-  border-color: #A51C30 !important;
+.border-academic-navy {
+  border-color: #002147 !important;
 }
 
 .border-academic-gold {
