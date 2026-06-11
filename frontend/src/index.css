@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lora:ital,wght@0,400..700;1,400..700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
 /* 
   Sleek Dark Mode - Premium UI Overhaul
@@ -201,3 +201,47 @@ tbody tr:hover {
   background: rgba(255,255,255,0.03) !important;
   transform: scale(1.002);
 }
+
+/* Harvard-inspired Academic Theme Overrides & Styles for Home Page */
+.academic-theme {
+  --academic-crimson: #A51C30;
+  --academic-crimson-hover: #801424;
+  --academic-gold: #C49A45;
+  --academic-cream: #FAF9F6;
+  --academic-cream-dark: #F3F1EC;
+  --academic-charcoal: #1E1E1E;
+  --academic-grey: #4A4A4A;
+}
+
+.font-serif-academic {
+  font-family: 'Lora', Georgia, serif !important;
+}
+
+.bg-academic-crimson {
+  background-color: #A51C30 !important;
+}
+
+.bg-academic-crimson-hover:hover {
+  background-color: #801424 !important;
+}
+
+.text-academic-crimson {
+  color: #A51C30 !important;
+}
+
+.text-academic-charcoal {
+  color: #1E1E1E !important;
+}
+
+.text-academic-gold {
+  color: #C49A45 !important;
+}
+
+.border-academic-crimson {
+  border-color: #A51C30 !important;
+}
+
+.border-academic-gold {
+  border-color: #C49A45 !important;
+}
+
