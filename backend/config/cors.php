@@ -22,7 +22,8 @@ return [
     'allowed_origins' => explode(',', env('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173,http://ntandaapp.com,https://ntandaapp.com,http://www.ntandaapp.com,https://www.ntandaapp.com')),
 
     'allowed_origins_patterns' => [
-        '#^https?://.*\.ntandaapp\.com$#',
+        '#^https?://(.*\.)?ntandaapp\.com$#',
+        '#^https?://(.*\.)?learningzm\.com$#',
     ],
 
     'allowed_headers' => ['*'],
