@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { studentPaymentService, paymentMethodService, studentAccountService } from '../../services/api';
 import { Upload, CheckCircle, Clock, XCircle, Download, ExternalLink } from 'lucide-react';
 

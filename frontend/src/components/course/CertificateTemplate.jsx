@@ -133,7 +133,7 @@ const CertificateTemplate = forwardRef(({ studentName, courseName, issueDate, va
           <div style={{ textAlign: 'right' }}>
             <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '5px' }}>Verify Authenticity at:</p>
             <p style={{ fontSize: '12px', color: '#0f172a', fontFamily: 'monospace' }}>
-              https://learningzm.com/verify/{validationCode}
+              https://ntandaapp.com/verify/{validationCode}
             </p>
           </div>
         </div>

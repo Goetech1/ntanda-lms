@@ -24,7 +24,7 @@ const AdminOrganization = () => {
     subdomain: '',
   });
 
-  const currentDomain = typeof window !== 'undefined' ? window.location.hostname.replace(/^www\./, '') : 'learningzm.com';
+  const currentDomain = typeof window !== 'undefined' ? window.location.hostname.replace(/^www\./, '') : 'ntandaapp.com';
 
   const fetchTenants = async () => {
     try {

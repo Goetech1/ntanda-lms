@@ -186,7 +186,7 @@ const AdminSettings = () => {
                     onChange={(e) => setSubdomain(e.target.value)}
                   />
                   <div className="bg-surface-container-high border border-outline-variant border-l-0 rounded-r py-3 px-4 font-label-md text-outline flex items-center justify-center">
-                    .learningzm.com
+                    .ntandaapp.com
                   </div>
                 </div>
               </div>
@@ -202,7 +202,7 @@ const AdminSettings = () => {
                   className="w-full bg-surface-container border border-outline-variant rounded py-3 px-4 font-body-md focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
                 />
                 <p className="text-body-sm text-on-surface-variant mt-1">
-                  To use a custom domain, you must create a <strong>CNAME</strong> or <strong>A Record</strong> with your domain registrar pointing to the LearningZM server IP address.
+                  To use a custom domain, you must create a <strong>CNAME</strong> or <strong>A Record</strong> with your domain registrar pointing to the Ntanda server IP address.
                 </p>
               </div>
 

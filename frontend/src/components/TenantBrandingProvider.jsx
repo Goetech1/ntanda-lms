@@ -18,10 +18,8 @@ export const TenantBrandingProvider = ({ children }) => {
       
       // List of main domains that represent the central platform (no tenant resolution needed)
       const mainDomains = new Set([
-        'learningzm.com',
-        'www.learningzm.com',
-        'ntanda.com',
-        'www.ntanda.com'
+        'ntandaapp.com',
+        'www.ntandaapp.com'
       ]);
 
       if (mainDomains.has(hostname)) {
@@ -39,8 +37,8 @@ export const TenantBrandingProvider = ({ children }) => {
       } else {
         const parts = hostname.split('.');
         
-        // Check if it's a subdomain of our main domains (e.g., demo.learningzm.com)
-        const isMainDomainSubdomain = hostname.endsWith('learningzm.com') || hostname.endsWith('ntanda.com');
+        // Check if it's a subdomain of our main domain (e.g., demo.ntandaapp.com)
+        const isMainDomainSubdomain = hostname.endsWith('ntandaapp.com');
 
         if (isMainDomainSubdomain && parts.length > 2) {
           const firstPart = parts[0];
@@ -119,7 +117,7 @@ export const TenantBrandingProvider = ({ children }) => {
           <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '10px' }}>Institution Not Found</h2>
           <p style={{ color: '#9ca3af', fontSize: '14px', lineHeight: '1.6', marginBottom: '24px' }}>{error}</p>
           <a 
-            href="https://learningzm.com" 
+            href="https://ntandaapp.com" 
             style={{ display: 'inline-block', width: '100%', backgroundColor: '#3b82f6', color: '#ffffff', textDecoration: 'none', fontWeight: 'bold', padding: '12px 20px', borderRadius: '8px', fontSize: '14px', transition: 'background-color 0.2s' }}
             onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
             onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#3b82f6'}
