@@ -1,0 +1,26 @@
+<component name="libraryTable">
+  <library name="composer">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/backend/vendor/composer/tmp-7fc7d4c4933bc21fcbb00c06cca31221.zip!/" />
+      <root url="jar://$PROJECT_DIR$/backend/vendor/composer/tmp-a3d62b458466aa32f6db983b4ded4496.zip!/" />
+      <root url="jar://$PROJECT_DIR$/backend/vendor/composer/tmp-427cd55143f507bfac6ce499b511f87d.zip!/" />
+      <root url="jar://$PROJECT_DIR$/backend/vendor/composer/tmp-0da036f55fb6d3be6c2f5eb943b16ddb.zip!/" />
+      <root url="jar://$PROJECT_DIR$/backend/vendor/composer/tmp-3f2fe29648d2348d3ed1f35e7204bda3.zip!/" />
+      <root url="jar://$PROJECT_DIR$/backend/vendor/composer/tmp-f8a6e55d8900885c12dadb45bd725d4b.zip!/" />
+      <root url="jar://$PROJECT_DIR$/backend/vendor/composer/tmp-9d4c830622864ff69030cbdd1ff39201.zip!/" />
+      <root url="jar://$PROJECT_DIR$/backend/vendor/composer/tmp-7f90ff8a4488ecf15f67bc1a86d07deb.zip!/" />
+      <root url="jar://$PROJECT_DIR$/backend/vendor/composer/tmp-0562b51904450888934e32308edd78af.zip!/" />
+      <root url="jar://$PROJECT_DIR$/backend/vendor/composer/tmp-0316a50003d6ccceaa3c36fca52692d7.zip!/" />
+      <root url="jar://$PROJECT_DIR$/backend/vendor/composer/tmp-053e99c77e4e25239ba94f8558e7e966.zip!/" />
+      <root url="jar://$PROJECT_DIR$/backend/vendor/composer/tmp-29fb950918f37b83dace01c2ae5c4618.zip!/" />
+      <root url="jar://$PROJECT_DIR$/backend/vendor/composer/tmp-27e5378154f67f8e3b5084ebc5feeb12.zip!/" />
+      <root url="jar://$PROJECT_DIR$/backend/vendor/composer/tmp-acb20a556c2d0b2e704d21c6ad22c7df.zip!/" />
+      <root url="jar://$PROJECT_DIR$/backend/vendor/composer/tmp-458e12f341f23039ec4fb63108a029d6.zip!/" />
+      <root url="jar://$PROJECT_DIR$/backend/vendor/composer/tmp-609abac723789486341101f119de0a2e.zip!/" />
+      <root url="jar://$PROJECT_DIR$/backend/vendor/composer/tmp-29158fecba38d64507f9e025c0451721.zip!/" />
+      <root url="jar://$PROJECT_DIR$/backend/vendor/composer/tmp-2dd9905edf0adb57c94e88913d36612d.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

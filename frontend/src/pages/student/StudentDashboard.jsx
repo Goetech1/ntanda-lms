@@ -1,34 +1,22 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { studentPortalService } from '../../services/api';
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
   const [enrollments, setEnrollments] = useState([]);
-  const [catalog, setCatalog] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Mocking responses if backend is disconnected
         const myCourses = await studentPortalService.getMyEnrollments().catch(() => ({
           data: { data: [
-            { id: '1', course: { id: 'c1', title: 'React Masterclass', thumbnail: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&q=80', instructor: 'Jane Smith' }, progress: 45, lastAccessed: 'Lesson 4: Hooks' },
-            { id: '2', course: { id: 'c2', title: 'Advanced CSS Grid', thumbnail: 'https://images.unsplash.com/photo-1507721999472-8ed4421c4af2?w=800&q=80', instructor: 'Mark Johnson' }, progress: 12, lastAccessed: 'Lesson 2: Subgrid' }
-          ]}
-        }));
-
-        const allCourses = await studentPortalService.getCourseCatalog().catch(() => ({
-          data: { data: [
-            { id: 'c3', title: 'Python for Beginners', thumbnail: 'https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=800&q=80', rating: 4.8 },
-            { id: 'c4', title: 'Figma UI Design', thumbnail: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&q=80', rating: 4.9 },
-            { id: 'c5', title: 'Node.js Backend Dev', thumbnail: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80', rating: 4.7 }
+            { id: '1', course: { id: 'c1', title: 'Data Science & Machine Learning', module: 'Module 4: Advanced Algorithms', thumbnail: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCqByl-I24mDf2Yazv3FY0yJnT06YC5NseqBKYTTN5p-2wTtOQXTEWys7eWBQElGBfqqxkwp5kKdNigqRGf6_VoVwCdCGZ4TrLCW6xpUQARMBN-uh6a2dM2B3WYhG_RvFXE_ujkKGFL73T1RbRENN9bisECIo_AkVvU4T6XxlDY8vaEbf8XYlLyxRsu1rlAopur7LptROgLsp5FB-i59IbSbfdP4Ld4AywOowKfDH-xzUsx10x1FX744K8c95jIHZ3HdnH1OJ0C-WY' }, progress: 68, lastAccessed: 'Neural Network Architectures and Backpropagation fundamentals. Next quiz scheduled for Friday.' }
           ]}
         }));
 
         setEnrollments(myCourses?.data?.data || myCourses?.data || []);
-        setCatalog(allCourses?.data?.data || allCourses?.data || []);
       } catch (err) {
         console.error('Error fetching student dashboard', err);
       } finally {
@@ -39,108 +27,155 @@ const StudentDashboard = () => {
     fetchData();
   }, []);
 
-  if (isLoading) return <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--primary)' }}>Loading your learning hub...</div>;
+  if (isLoading) return <div className="p-xl text-center text-primary font-bold">Loading your learning hub...</div>;
 
   const lastActive = enrollments[0];
 
   return (
-    <div style={{ paddingBottom: '2rem' }}>
-      
-      {/* Netflix-Style Hero Banner */}
-      {lastActive && (
-        <div style={{ 
-          position: 'relative', width: '100%', height: '50vh', minHeight: '400px', 
-          backgroundImage: `url(${lastActive.course.thumbnail})`, backgroundSize: 'cover', backgroundPosition: 'center',
-          display: 'flex', alignItems: 'flex-end'
-        }}>
-          {/* Gradient Overlay */}
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, var(--bg-color) 0%, rgba(11,12,16,0.6) 50%, rgba(11,12,16,0.2) 100%)' }} />
-          
-          <div className="animate-fade-up" style={{ position: 'relative', zIndex: 10, padding: '3rem', width: '100%', maxWidth: '800px' }}>
-            <div style={{ color: 'var(--primary)', fontWeight: 'bold', letterSpacing: '2px', textTransform: 'uppercase', fontSize: '0.8rem', marginBottom: '0.5rem' }}>Continue Learning</div>
-            <h1 style={{ fontSize: '3rem', margin: '0 0 0.5rem 0', textShadow: '0 4px 10px rgba(0,0,0,0.5)' }}>{lastActive.course.title}</h1>
-            <p style={{ color: '#ccc', fontSize: '1.2rem', margin: '0 0 1.5rem 0' }}>Up next: {lastActive.lastAccessed}</p>
-            
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-              <button 
-                onClick={() => navigate(`/student/player/${lastActive.course.id}`)}
-                className="btn" 
-                style={{ background: '#fff', color: '#000', padding: '0.75rem 2rem', fontSize: '1.2rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '0.5rem', borderRadius: '4px' }}
-              >
-                <span>▶️</span> Resume
-              </button>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, maxWidth: '300px' }}>
-                <div style={{ height: '6px', background: 'rgba(255,255,255,0.2)', borderRadius: '3px', flex: 1, overflow: 'hidden' }}>
-                  <div style={{ width: `${lastActive.progress}%`, height: '100%', background: 'var(--primary)', boxShadow: '0 0 10px var(--primary-glow)' }} />
-                </div>
-                <span style={{ color: '#fff', fontWeight: 'bold' }}>{lastActive.progress}%</span>
-              </div>
+    <main className="max-w-max-width mx-auto px-margin-mobile md:px-margin-desktop py-xl pb-32 animate-fade-up">
+      {/* Welcome Greeting */}
+      <section className="mb-3xl">
+        <h2 className="font-display-lg-mobile md:font-display-lg text-display-lg-mobile md:text-display-lg text-on-background">
+          Welcome back, <span className="text-primary">Alex</span>.
+        </h2>
+        <p className="font-body-lg text-body-lg text-on-surface-variant mt-xs">You've completed 12% of your weekly goal. Keep the momentum going!</p>
+      </section>
+
+      {/* Bento Grid Progress Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter mb-3xl">
+        {/* Overall Progress Card */}
+        <div className="md:col-span-8 bg-surface-container-lowest border border-outline-variant rounded-xl p-lg shadow-[0_4px_16px_rgba(0,83,219,0.05)]">
+          <div className="flex justify-between items-start mb-xl">
+            <div>
+              <span className="font-label-md text-label-md text-tertiary bg-tertiary/10 px-sm py-xs rounded mb-sm inline-block">ACADEMIC OVERVIEW</span>
+              <h3 className="font-headline-md text-headline-md text-on-background">Semester Performance</h3>
+            </div>
+            <div className="text-right">
+              <span className="font-headline-md text-headline-md text-primary">3.8 GPA</span>
+              <p className="font-label-sm text-label-sm text-on-surface-variant">Current Average</p>
+            </div>
+          </div>
+          <div className="h-48 w-full flex items-end justify-between gap-sm pt-md">
+            {/* Simple bar chart visualization */}
+            <div className="flex-1 bg-primary/10 rounded-t-lg relative group transition-all duration-300 hover:bg-primary/20 h-[65%]">
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 font-label-sm text-label-sm opacity-0 group-hover:opacity-100 transition-opacity">Mon</div>
+            </div>
+            <div className="flex-1 bg-primary/10 rounded-t-lg relative group transition-all duration-300 hover:bg-primary/20 h-[40%]">
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 font-label-sm text-label-sm opacity-0 group-hover:opacity-100 transition-opacity">Tue</div>
+            </div>
+            <div className="flex-1 bg-primary rounded-t-lg relative group transition-all duration-300 h-[85%]">
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 font-label-sm text-label-sm opacity-100">Wed</div>
+            </div>
+            <div className="flex-1 bg-primary/10 rounded-t-lg relative group transition-all duration-300 hover:bg-primary/20 h-[55%]">
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 font-label-sm text-label-sm opacity-0 group-hover:opacity-100 transition-opacity">Thu</div>
+            </div>
+            <div className="flex-1 bg-primary/10 rounded-t-lg relative group transition-all duration-300 hover:bg-primary/20 h-[70%]">
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 font-label-sm text-label-sm opacity-0 group-hover:opacity-100 transition-opacity">Fri</div>
             </div>
           </div>
         </div>
+
+        {/* Quick Stats Column */}
+        <div className="md:col-span-4 flex flex-col gap-gutter">
+          <div className="flex-1 bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex flex-col justify-center">
+            <div className="flex items-center gap-md mb-sm">
+              <div className="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary">
+                <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 0"}}>schedule</span>
+              </div>
+              <span className="font-label-md text-label-md text-on-surface-variant">STUDY HOURS</span>
+            </div>
+            <div className="font-headline-md text-headline-md">24.5 hrs</div>
+            <p className="font-label-sm text-label-sm text-primary">+2.4h from last week</p>
+          </div>
+          <div className="flex-1 bg-secondary/5 border border-secondary/10 rounded-xl p-md flex flex-col justify-center">
+            <div className="flex items-center gap-md mb-sm">
+              <div className="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center text-secondary">
+                <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 0"}}>assignment_turned_in</span>
+              </div>
+              <span className="font-label-md text-label-md text-on-surface-variant">ASSIGNMENTS</span>
+            </div>
+            <div className="font-headline-md text-headline-md text-secondary">8 / 10</div>
+            <p className="font-label-sm text-label-sm text-secondary-container">2 Pending this week</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Continue Learning Section */}
+      {lastActive && (
+        <section className="mb-3xl">
+          <div className="flex justify-between items-center mb-lg">
+            <h3 className="font-headline-md text-headline-md text-on-background">Continue Learning</h3>
+            <button onClick={() => navigate('/student/my-courses')} className="text-primary font-label-md text-label-md flex items-center gap-xs hover:underline">
+              View Schedule <span className="material-symbols-outlined text-[16px]" style={{fontVariationSettings: "'FILL' 0"}}>arrow_forward</span>
+            </button>
+          </div>
+          <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden group flex flex-col md:flex-row cursor-pointer" onClick={() => navigate(`/student/player/${lastActive.course.id}`)}>
+            <div className="md:w-1/3 h-48 md:h-auto relative overflow-hidden">
+              <img className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" src={lastActive.course.thumbnail} alt="Course Thumbnail" />
+              <div className="absolute inset-0 bg-primary/10 mix-blend-multiply"></div>
+            </div>
+            <div className="flex-1 p-xl">
+              <div className="flex justify-between items-start mb-md">
+                <div>
+                  <span className="text-primary font-label-sm text-label-sm border border-primary/20 px-sm py-1 rounded">{lastActive.course.module || 'Current Module'}</span>
+                  <h4 className="font-headline-md text-headline-md mt-sm">{lastActive.course.title}</h4>
+                </div>
+                <div className="p-2 bg-primary text-on-primary rounded-lg active:scale-95 transition-all">
+                  <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 1"}}>play_arrow</span>
+                </div>
+              </div>
+              <p className="font-body-md text-body-md text-on-surface-variant mb-xl max-w-2xl">Currently studying: {lastActive.lastAccessed}</p>
+              
+              <div className="space-y-sm">
+                <div className="flex justify-between font-label-sm text-label-sm">
+                  <span className="text-on-surface-variant">Course Progress</span>
+                  <span className="text-primary font-bold">{lastActive.progress}%</span>
+                </div>
+                <div className="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
+                  <div className="h-full bg-primary rounded-full transition-all duration-1000" style={{ width: `${lastActive.progress}%` }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
       )}
 
-      <div style={{ padding: '0 2rem', marginTop: '-2rem', position: 'relative', zIndex: 20 }}>
-        
-        {/* Enrolled Courses Carousel */}
-        <div style={{ marginBottom: '3rem' }}>
-          <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>My Courses</h2>
-          <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '1rem', scrollbarWidth: 'none' }}>
-            {enrollments.map(e => (
-              <div 
-                key={e.id} 
-                onClick={() => navigate(`/student/player/${e.course.id}`)}
-                style={{ 
-                  minWidth: '280px', width: '280px', borderRadius: '8px', overflow: 'hidden', 
-                  background: 'rgba(255,255,255,0.03)', cursor: 'pointer', transition: 'transform 0.2s',
-                  boxShadow: '0 10px 20px rgba(0,0,0,0.2)'
-                }}
-                onMouseEnter={ev => ev.currentTarget.style.transform = 'scale(1.05)'}
-                onMouseLeave={ev => ev.currentTarget.style.transform = 'scale(1)'}
-              >
-                <div style={{ height: '150px', backgroundImage: `url(${e.course.thumbnail})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
-                <div style={{ padding: '1rem' }}>
-                  <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{e.course.title}</h4>
-                  <div style={{ height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', marginBottom: '0.5rem' }}>
-                    <div style={{ width: `${e.progress}%`, height: '100%', background: 'var(--primary)' }} />
-                  </div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{e.progress}% Completed</div>
-                </div>
-              </div>
-            ))}
+      {/* Upcoming Deadlines */}
+      <section>
+        <h3 className="font-headline-md text-headline-md text-on-background mb-lg">Upcoming Milestones</h3>
+        <div className="space-y-md">
+          <div className="bg-surface-container-lowest border border-outline-variant p-md rounded-lg flex items-center gap-lg hover:border-primary transition-colors cursor-pointer group">
+            <div className="w-12 h-12 bg-surface-container rounded-lg flex flex-col items-center justify-center border border-outline-variant shrink-0 group-hover:bg-primary-fixed transition-colors">
+              <span className="font-label-sm text-label-sm text-on-surface-variant group-hover:text-primary">OCT</span>
+              <span className="font-headline-sm text-headline-sm leading-none">24</span>
+            </div>
+            <div className="flex-1">
+              <h5 className="font-body-md text-body-md font-bold">Research Thesis Draft Submission</h5>
+              <p className="font-body-sm text-body-sm text-on-surface-variant">Environmental Economics (ECON-402)</p>
+            </div>
+            <div className="hidden md:flex gap-sm">
+              <span className="font-label-sm text-label-sm bg-error-container text-on-error-container px-sm py-1 rounded">High Priority</span>
+              <span className="font-label-sm text-label-sm bg-surface-container-high px-sm py-1 rounded">File Upload</span>
+            </div>
+          </div>
+          
+          <div className="bg-surface-container-lowest border border-outline-variant p-md rounded-lg flex items-center gap-lg hover:border-primary transition-colors cursor-pointer group">
+            <div className="w-12 h-12 bg-surface-container rounded-lg flex flex-col items-center justify-center border border-outline-variant shrink-0 group-hover:bg-primary-fixed transition-colors">
+              <span className="font-label-sm text-label-sm text-on-surface-variant group-hover:text-primary">OCT</span>
+              <span className="font-headline-sm text-headline-sm leading-none">27</span>
+            </div>
+            <div className="flex-1">
+              <h5 className="font-body-md text-body-md font-bold">Midterm Group Presentation</h5>
+              <p className="font-body-sm text-body-sm text-on-surface-variant">Human Computer Interaction (CS-310)</p>
+            </div>
+            <div className="hidden md:flex gap-sm">
+              <span className="font-label-sm text-label-sm bg-secondary-fixed text-on-secondary-fixed px-sm py-1 rounded">Group Work</span>
+              <span className="font-label-sm text-label-sm bg-surface-container-high px-sm py-1 rounded">Lab Room 3B</span>
+            </div>
           </div>
         </div>
-
-        {/* Recommended Courses Carousel */}
-        <div>
-          <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Recommended For You</h2>
-          <div style={{ display: 'flex', gap: '1rem', overflowX: 'auto', paddingBottom: '1rem', scrollbarWidth: 'none' }}>
-            {catalog.map(c => (
-              <div 
-                key={c.id} 
-                style={{ 
-                  minWidth: '220px', width: '220px', borderRadius: '8px', overflow: 'hidden', 
-                  background: 'rgba(255,255,255,0.03)', cursor: 'pointer', transition: 'transform 0.2s'
-                }}
-                onMouseEnter={ev => ev.currentTarget.style.transform = 'scale(1.05)'}
-                onMouseLeave={ev => ev.currentTarget.style.transform = 'scale(1)'}
-              >
-                <div style={{ height: '300px', backgroundImage: `url(${c.thumbnail})`, backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative' }}>
-                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.9), transparent)' }} />
-                  <div style={{ position: 'absolute', bottom: '1rem', left: '1rem', right: '1rem' }}>
-                    <h4 style={{ margin: '0 0 0.5rem 0', color: '#fff', fontSize: '1rem' }}>{c.title}</h4>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: '#f59e0b', fontWeight: 'bold' }}>
-                      ⭐ {c.rating}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-      </div>
-    </div>
+      </section>
+    </main>
   );
 };
 

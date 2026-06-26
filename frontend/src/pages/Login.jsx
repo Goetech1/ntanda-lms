@@ -1,9 +1,14 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Mail, Lock } from 'lucide-react';
 import { authService, setAccessToken } from '../services/api';
-import { Mail, Lock, ArrowRight, Sparkles, ShieldCheck } from 'lucide-react';
+import { useTenantBranding } from '../components/TenantBrandingProvider';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/Card';
 
 const Login = () => {
+  const { tenant } = useTenantBranding();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -22,7 +27,7 @@ const Login = () => {
       setAccessToken(access_token);
       localStorage.setItem('user', JSON.stringify(user));
       
-      if (user.role === 'SUPER_ADMIN' || user.role === 'TENANT_ADMIN') {
+      if (user.role === 'SUPER_ADMIN' || user.role === 'TENANT_ADMIN' || user.role === 'ADMIN') {
         navigate('/admin');
       } else if (user.role === 'INSTRUCTOR') {
         navigate('/instructor');
@@ -30,272 +35,126 @@ const Login = () => {
         navigate('/student');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to authenticate. Please check your credentials.');
+      setError(err.response?.data?.message || 'Invalid email or password.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleDemoLogin = (role = 'STUDENT') => {
-    const demoUser = {
-      id: "demo-uuid-1234",
-      email: role === 'ADMIN' ? "admin@ntanda.io" : "student@ntanda.io",
-      fullName: role === 'ADMIN' ? "Demo Admin" : "Demo Student",
-      role: role,
-      tenantId: "123e4567-e89b-12d3-a456-426614174000"
-    };
-    
-    setAccessToken("fake-jwt-token-for-demo");
-    localStorage.setItem('user', JSON.stringify(demoUser));
-    
-    if (role === 'ADMIN') {
-      navigate('/admin');
-    } else {
-      navigate('/dashboard');
-    }
-  };
-
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center',
-      position: 'relative',
-      overflow: 'hidden',
-      backgroundColor: '#050505'
-    }}>
-      {/* Animated Background Elements */}
-      <div style={{
-        position: 'absolute', top: '-10%', left: '-10%', width: '40vw', height: '40vw',
-        background: 'radial-gradient(circle, rgba(0,229,255,0.15) 0%, rgba(0,0,0,0) 70%)',
-        filter: 'blur(60px)', zIndex: 0,
-        animation: 'float 10s ease-in-out infinite'
-      }} />
-      <div style={{
-        position: 'absolute', bottom: '-20%', right: '-10%', width: '50vw', height: '50vw',
-        background: 'radial-gradient(circle, rgba(255,51,102,0.1) 0%, rgba(0,0,0,0) 70%)',
-        filter: 'blur(80px)', zIndex: 0,
-        animation: 'float 15s ease-in-out infinite reverse'
-      }} />
-
-      {/* Main Glass Container */}
-      <div className="glass-panel animate-fade-up" style={{
-        display: 'flex',
-        width: '100%',
-        maxWidth: '1200px',
-        minHeight: '700px',
-        margin: '2rem',
-        padding: '0',
-        zIndex: 1,
-        overflow: 'hidden',
-        border: '1px solid rgba(255,255,255,0.05)',
-        boxShadow: '0 25px 50px -12px rgba(0,0,0,0.7)',
-        position: 'relative'
-      }}>
-        
-        {/* Left Side - Brand & Graphics */}
-        <div style={{ 
-          flex: '1', 
-          position: 'relative',
-          padding: '4rem',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          background: 'linear-gradient(135deg, rgba(20,20,25,0.8), rgba(10,10,12,0.9))',
-          borderRight: '1px solid rgba(255,255,255,0.05)'
-        }} className="desktop-only-flex">
-          
-          <div>
-            <Link to="/" style={{ display: 'inline-block', marginBottom: '4rem' }}>
-              <img src="/ntanda-logo.jpeg" alt="Ntanda LMS" style={{ height: '50px', borderRadius: '12px', boxShadow: '0 8px 16px rgba(0,0,0,0.3)' }} />
-            </Link>
-            
-            <h1 style={{ 
-              fontSize: '3.5rem', 
-              fontWeight: '800', 
-              lineHeight: '1.1',
-              marginBottom: '1.5rem',
-              background: 'linear-gradient(to right, #fff, #a5b4fc)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              letterSpacing: '-1px'
-            }}>
-              Master Your <br/>
-              <span style={{ 
-                background: 'linear-gradient(to right, #00e5ff, #0088ff)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent'
-              }}>Craft Today.</span>
-            </h1>
-            
-            <p style={{ 
-              fontSize: '1.1rem', 
-              color: 'var(--text-muted)', 
-              maxWidth: '85%',
-              lineHeight: '1.6',
-              fontWeight: '400'
-            }}>
-              Join the next generation of digital pioneers. Access world-class courses, live mentorship, and real-world projects.
-            </p>
-          </div>
-
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '1rem',
-            padding: '1.5rem',
-            background: 'rgba(255,255,255,0.03)',
-            borderRadius: '16px',
-            border: '1px solid rgba(255,255,255,0.05)',
-            backdropFilter: 'blur(10px)'
-          }}>
-            <div style={{ 
-              width: '48px', height: '48px', 
-              borderRadius: '50%', 
-              background: 'linear-gradient(135deg, rgba(0,229,255,0.2), rgba(0,229,255,0.05))',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#00e5ff'
-            }}>
-              <ShieldCheck size={24} />
-            </div>
-            <div>
-              <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: '600' }}>Secure Enterprise LMS</h4>
-              <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>Bank-grade encryption & data privacy.</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Side - Login Form */}
-        <div style={{ 
-          flex: '1', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          padding: '4rem',
-          background: 'rgba(10,12,16,0.5)'
-        }}>
-          <div style={{ width: '100%', maxWidth: '420px' }}>
-            
-            <div style={{ marginBottom: '3rem' }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', background: 'rgba(0,229,255,0.1)', color: '#00e5ff', borderRadius: '100px', fontSize: '0.85rem', fontWeight: '600', marginBottom: '1.5rem' }}>
-                <Sparkles size={16} /> Welcome Back
-              </div>
-              <h2 style={{ fontSize: '2.5rem', fontWeight: '700', marginBottom: '0.5rem', letterSpacing: '-0.5px' }}>Sign in.</h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>Enter your credentials to access your portal.</p>
-            </div>
-            
-            {error && (
-              <div className="animate-slide-in-right" style={{ 
-                background: 'rgba(239, 68, 68, 0.1)', 
-                borderLeft: '4px solid #ef4444', 
-                color: '#fca5a5', 
-                padding: '1rem', 
-                borderRadius: '0 8px 8px 0', 
-                marginBottom: '2rem', 
-                fontSize: '0.9rem',
-                display: 'flex', alignItems: 'center', gap: '0.75rem'
-              }}>
-                {error}
+    <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row selection:bg-[#2563EB] selection:text-white">
+      {/* Left Side: Form */}
+      <div className="w-full md:w-[60%] lg:w-1/2 flex flex-col justify-center items-center p-4 md:p-8 lg:p-12 relative z-10 min-h-screen md:min-h-0">
+        <div className="w-full max-w-[420px] animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="flex flex-col items-center mb-8">
+            {tenant?.branding?.logoUrl ? (
+              <img src={tenant.branding.logoUrl} alt={tenant.name} className="h-12 w-12 rounded-xl object-cover shadow-sm mb-4" />
+            ) : (
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-[#2563EB] to-[#1D4ED8] shadow-sm mb-4 flex items-center justify-center">
+                <span className="text-xl font-bold text-white">{tenant?.name?.charAt(0) || "N"}</span>
               </div>
             )}
-
-            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              
-              <div style={{ position: 'relative' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '500', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Email Address</label>
-                <div style={{ position: 'relative' }}>
-                  <Mail size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="name@company.com"
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '1rem 1rem 1rem 3rem',
-                      background: 'rgba(255,255,255,0.03)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '12px',
-                      color: '#fff',
-                      fontSize: '1rem',
-                      transition: 'all 0.3s ease'
-                    }}
-                  />
-                </div>
-              </div>
-              
-              <div style={{ position: 'relative' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <label style={{ fontSize: '0.85rem', fontWeight: '500', color: 'var(--text-muted)' }}>Password</label>
-                  <a href="#" style={{ color: 'var(--primary)', fontSize: '0.8rem', fontWeight: '500', textDecoration: 'none' }}>Forgot password?</a>
-                </div>
-                <div style={{ position: 'relative' }}>
-                  <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '1rem 1rem 1rem 3rem',
-                      background: 'rgba(255,255,255,0.03)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '12px',
-                      color: '#fff',
-                      fontSize: '1rem',
-                      transition: 'all 0.3s ease'
-                    }}
-                  />
-                </div>
-              </div>
-
-              <button type="submit" disabled={isLoading} style={{
-                width: '100%',
-                padding: '1rem',
-                background: 'linear-gradient(135deg, var(--primary), #0088ff)',
-                color: '#000',
-                border: 'none',
-                borderRadius: '12px',
-                fontSize: '1rem',
-                fontWeight: '600',
-                marginTop: '1rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.5rem',
-                boxShadow: '0 10px 25px -5px rgba(0,229,255,0.4)',
-                transition: 'all 0.3s ease',
-                opacity: isLoading ? 0.7 : 1
-              }}>
-                {isLoading ? 'Authenticating...' : 'Sign In'} 
-                {!isLoading && <ArrowRight size={18} />}
-              </button>
-              
-              <div style={{ marginTop: '2rem', paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1rem' }}>Or quick access for testing:</p>
-                <div style={{ display: 'flex', gap: '1rem' }}>
-                  <button type="button" onClick={() => handleDemoLogin('STUDENT')} style={{
-                    flex: 1, padding: '0.75rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '8px', color: '#fff', fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s'
-                  }}>Demo Student</button>
-                  <button type="button" onClick={() => handleDemoLogin('ADMIN')} style={{
-                    flex: 1, padding: '0.75rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '8px', color: '#fff', fontSize: '0.85rem', cursor: 'pointer', transition: 'all 0.2s'
-                  }}>Demo Admin</button>
-                </div>
-              </div>
-
-              <p style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                Don't have an account? <Link to="/register" style={{ color: '#fff', fontWeight: '500', textDecoration: 'none', borderBottom: '1px solid var(--primary)' }}>Create one</Link>
-              </p>
-              
-            </form>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">{tenant?.name || "Ntanda LMS"}</h1>
           </div>
+
+          <Card className="w-full bg-[#FFFFFF] shadow-[0_10px_30px_rgba(0,0,0,0.08)] rounded-[16px] border-0">
+            <CardHeader className="space-y-2 text-center pb-6">
+              <CardTitle className="text-2xl font-bold text-slate-900">Welcome back</CardTitle>
+              <CardDescription className="text-slate-600">
+                Enter your credentials to access your account
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {error && (
+                <div className="mb-6 p-3 rounded-lg bg-red-50 text-red-700 border border-red-200 text-sm flex items-center animate-in shake font-medium">
+                  {error}
+                </div>
+              )}
+
+              <form onSubmit={handleLogin} className="space-y-6">
+                <div className="space-y-4">
+                  <label className="text-sm font-semibold text-slate-900" htmlFor="email">Email address</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Mail className="h-5 w-5 text-slate-400" />
+                    </div>
+                    <Input 
+                      id="email"
+                      type="email"
+                      placeholder="name@university.edu"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="pl-10 !bg-white border-[#D1D5DB] focus-visible:border-[#2563EB] focus-visible:ring-[4px] focus-visible:ring-[#2563EB]/15 text-slate-900 h-12"
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-semibold text-slate-900" htmlFor="password">Password</label>
+                    <Link to="/forgot-password" className="text-sm text-[#2563EB] hover:underline hover:text-[#1D4ED8] transition-colors font-medium">
+                      Forgot password?
+                    </Link>
+                  </div>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Lock className="h-5 w-5 text-slate-400" />
+                    </div>
+                    <Input 
+                      id="password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      className="pl-10 !bg-white border-[#D1D5DB] focus-visible:border-[#2563EB] focus-visible:ring-[4px] focus-visible:ring-[#2563EB]/15 text-slate-900 h-12"
+                      disabled={isLoading}
+                    />
+                  </div>
+                </div>
+
+                <Button type="submit" className="w-full mt-6 bg-[#2563EB] hover:bg-[#1D4ED8] text-white h-12 rounded-[10px]" isLoading={isLoading}>
+                  Sign in
+                </Button>
+              </form>
+            </CardContent>
+            <CardFooter className="flex flex-col space-y-4 pt-6 border-t border-slate-100 mt-2">
+              <div className="text-sm text-slate-600 text-center w-full">
+                Don't have an account?{' '}
+                <Link to="/register" className="text-[#2563EB] hover:underline font-semibold">
+                  Request access
+                </Link>
+              </div>
+            </CardFooter>
+          </Card>
+        </div>
+        
+        <footer className="absolute bottom-6 text-center text-xs text-slate-500 w-full px-4 font-medium">
+          © {new Date().getFullYear()} Ntanda LMS. Empowering education through technology.
+        </footer>
+      </div>
+
+      {/* Right Side: Branding */}
+      <div className="hidden md:flex md:w-[40%] lg:w-1/2 relative bg-slate-900 overflow-hidden items-center justify-center">
+        <img 
+          src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=2000&auto=format&fit=crop" 
+          alt="Students learning" 
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-black/45 z-10" />
+        
+        <div className="z-20 w-full max-w-xl p-8 lg:p-12 text-left animate-in fade-in duration-1000">
+          <div className="h-16 w-16 bg-[#2563EB] rounded-2xl flex items-center justify-center mb-8 shadow-lg">
+            <Lock className="h-8 w-8 text-white" />
+          </div>
+          <h2 className="text-[48px] font-bold text-white mb-6 leading-tight">
+            Your Learning Journey Starts Here
+          </h2>
+          <p className="text-slate-200 text-xl leading-relaxed max-w-md font-medium">
+            Join thousands of students and instructors in a seamless, premium learning experience powered by Ntanda LMS.
+          </p>
         </div>
       </div>
     </div>

@@ -1,199 +1,284 @@
-import { useState, useEffect } from 'react';
-import { assessmentService, examService } from '../../services/api';
+import React, { useState, useEffect } from 'react';
+import { assessmentService, examService, courseService } from '../../services/api';
 
 const AdminAssessments = () => {
   const [assessments, setAssessments] = useState([]);
+  const [courses, setCourses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Drawer State
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [form, setForm] = useState({ title: '', type: 'QUIZ', courseId: '', durationMinutes: 30, requireWebcam: false, secureBrowser: false });
+  // Drawer/Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [form, setForm] = useState({ 
+    title: '', 
+    type: 'QUIZ', 
+    courseId: '', 
+    durationMinutes: 30, 
+    requireWebcam: false, 
+    secureBrowser: false 
+  });
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const [assesRes, courseRes] = await Promise.all([
+        assessmentService.getAll().catch(() => ({ data: [] })),
+        courseService.getAllCourses().catch(() => ({ data: { data: [] } }))
+      ]);
+
+      const fetchedAsses = assesRes?.data?.data || assesRes?.data || [];
+      const fetchedCourses = courseRes?.data?.data || courseRes?.data || [];
+
+      if (fetchedAsses.length === 0) {
+        setAssessments([
+          { id: '1', title: 'React Fundamentals Quiz', type: 'QUIZ', courseTitle: 'React 101', questionCount: 10, durationMinutes: 15 },
+          { id: '2', title: 'Midterm Exam: Advanced JS', type: 'EXAM', courseTitle: 'JS Masterclass', questionCount: 50, durationMinutes: 120, requireWebcam: true },
+          { id: '3', title: 'CSS Grid Challenge', type: 'QUIZ', courseTitle: 'Modern CSS', questionCount: 5, durationMinutes: 10 }
+        ]);
+      } else {
+        setAssessments(fetchedAsses);
+      }
+
+      setCourses(Array.isArray(fetchedCourses) ? fetchedCourses : []);
+    } catch (err) {
+      console.error('Error fetching assessments', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await assessmentService.getAll().catch(() => ({
-          data: { data: [
-            { id: '1', title: 'React Fundamentals Quiz', type: 'QUIZ', course: 'React 101', questionCount: 10, durationMinutes: 15 },
-            { id: '2', title: 'Midterm Exam: Advanced JS', type: 'EXAM', course: 'JS Masterclass', questionCount: 50, durationMinutes: 120, requireWebcam: true },
-            { id: '3', title: 'CSS Grid Challenge', type: 'QUIZ', course: 'Modern CSS', questionCount: 5, durationMinutes: 10 }
-          ]}
-        }));
-        
-        setAssessments(res?.data?.data || res?.data || []);
-      } catch (err) {
-        console.error('Error fetching assessments', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchData();
   }, []);
 
   const handleCreate = async (e) => {
     e.preventDefault();
     try {
-      const newAsses = { ...form, id: Date.now().toString(), questionCount: 0 };
-      
       if (form.type === 'EXAM') {
         await examService.schedule(form).catch(() => {});
       } else {
         await assessmentService.create(form).catch(() => {});
       }
       
-      setAssessments([...assessments, newAsses]);
-      setIsDrawerOpen(false);
+      setIsModalOpen(false);
       setForm({ title: '', type: 'QUIZ', courseId: '', durationMinutes: 30, requireWebcam: false, secureBrowser: false });
-      alert('Assessment created successfully!');
+      fetchData(); // Refresh list
     } catch {
       alert('Failed to create assessment');
     }
   };
 
-  if (isLoading) return <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--primary)' }}>Loading Assessments...</div>;
-
   return (
-    <div style={{ paddingBottom: '4rem', maxWidth: '1200px', position: 'relative' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem' }}>
+    <div className="flex-1 max-w-max-width mx-auto w-full p-md md:p-margin-desktop space-y-3xl font-body-md bg-surface-bright">
+      {/* Header */}
+      <section className="flex flex-col md:flex-row md:items-end justify-between gap-lg">
         <div>
-          <h1 style={{ fontSize: '2.5rem', margin: '0 0 0.5rem 0' }}>Assessments & Exams</h1>
-          <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '1.1rem' }}>Manage quizzes, high-stakes exams, and question banks.</p>
+          <nav className="flex items-center gap-2 text-label-sm text-on-surface-variant mb-base">
+            <span>Academic Operations</span>
+            <span className="material-symbols-outlined text-[12px]" style={{fontVariationSettings: "'FILL' 0"}}>chevron_right</span>
+            <span className="text-primary font-bold">Assessments</span>
+          </nav>
+          <h2 className="font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface">Assessments & Exams</h2>
+          <p className="text-body-lg text-on-surface-variant mt-xs">Manage quizzes, high-stakes exams, and question banks.</p>
         </div>
-        <button onClick={() => setIsDrawerOpen(true)} className="btn btn-primary" style={{ padding: '0.75rem 1.5rem', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span>📝</span> Create Assessment
-        </button>
-      </div>
-
-      <div className="glass-panel animate-fade-up" style={{ padding: '2rem' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead>
-            <tr style={{ color: 'var(--text-muted)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-              <th style={{ padding: '1rem' }}>Title</th>
-              <th style={{ padding: '1rem' }}>Type</th>
-              <th style={{ padding: '1rem' }}>Course</th>
-              <th style={{ padding: '1rem' }}>Details</th>
-              <th style={{ padding: '1rem', textAlign: 'right' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {assessments.map(a => (
-              <tr key={a.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)', transition: 'background 0.2s' }}>
-                <td style={{ padding: '1.25rem 1rem', fontWeight: 'bold', color: '#fff' }}>{a.title}</td>
-                <td style={{ padding: '1.25rem 1rem' }}>
-                  <span style={{ 
-                    padding: '0.3rem 0.6rem', 
-                    borderRadius: '99px', 
-                    fontSize: '0.75rem', 
-                    fontWeight: 'bold',
-                    background: a.type === 'EXAM' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(59, 130, 246, 0.15)', 
-                    color: a.type === 'EXAM' ? '#ef4444' : '#3b82f6',
-                    border: `1px solid ${a.type === 'EXAM' ? 'rgba(239, 68, 68, 0.3)' : 'rgba(59, 130, 246, 0.3)'}`
-                  }}>
-                    {a.type}
-                  </span>
-                </td>
-                <td style={{ padding: '1.25rem 1rem', color: 'var(--text-muted)' }}>{a.course || 'Unassigned'}</td>
-                <td style={{ padding: '1.25rem 1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                  {a.questionCount} Qs • {a.durationMinutes}m
-                  {a.requireWebcam && <span title="Webcam Required" style={{ marginLeft: '0.5rem' }}>📷</span>}
-                </td>
-                <td style={{ padding: '1.25rem 1rem', textAlign: 'right' }}>
-                  <button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>Edit Questions</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Creation Drawer */}
-      {isDrawerOpen && <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100 }} onClick={() => setIsDrawerOpen(false)} />}
-      <div 
-        className={isDrawerOpen ? 'animate-slide-in-right' : ''}
-        style={{
-          position: 'fixed', top: 0, right: 0, bottom: 0, width: '450px',
-          background: 'rgba(11, 12, 16, 0.95)', backdropFilter: 'blur(30px)',
-          borderLeft: '1px solid var(--border-color)', zIndex: 101,
-          padding: '2rem', display: 'flex', flexDirection: 'column',
-          transform: isDrawerOpen ? 'translateX(0)' : 'translateX(100%)',
-          transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-          boxShadow: '-20px 0 50px rgba(0,0,0,0.5)'
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-          <h2 style={{ margin: 0 }}>Create Assessment</h2>
-          <button onClick={() => setIsDrawerOpen(false)} style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
+        <div className="flex items-center gap-md">
+          <button 
+            className="px-lg py-3 rounded-lg bg-primary text-on-primary font-bold hover:opacity-90 transition-opacity flex items-center gap-2 shadow-lg"
+            onClick={() => setIsModalOpen(true)}
+          >
+            <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 0"}}>edit_note</span>
+            Create Assessment
+          </button>
         </div>
+      </section>
 
-        <form onSubmit={handleCreate} style={{ flex: 1, overflowY: 'auto', paddingRight: '0.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          
+      {/* Stats Bento Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-lg mb-3xl">
+        <div className="bg-surface-container-lowest border border-outline-variant p-xl rounded-xl flex flex-col justify-between">
+          <div className="flex justify-between items-start mb-lg">
+            <div className="p-sm bg-primary/10 text-primary rounded-lg">
+              <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 0"}}>quiz</span>
+            </div>
+          </div>
           <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Title</label>
-            <input 
-              type="text" 
-              value={form.title} 
-              onChange={e => setForm({...form, title: e.target.value})}
-              required 
-              style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'rgba(0,0,0,0.3)', color: '#fff' }} 
-            />
+            <p className="font-label-md text-on-surface-variant uppercase tracking-wider mb-xs">Active Quizzes</p>
+            <p className="font-display-lg text-on-surface font-bold">{assessments.filter(a => a.type === 'QUIZ').length}</p>
           </div>
+        </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Type</label>
-              <select 
-                value={form.type} 
-                onChange={e => setForm({...form, type: e.target.value})}
-                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'rgba(0,0,0,0.3)', color: '#fff' }} 
-              >
-                <option value="QUIZ">Quiz</option>
-                <option value="EXAM">High-Stakes Exam</option>
-              </select>
-            </div>
-            <div>
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Duration (Mins)</label>
-              <input 
-                type="number" 
-                value={form.durationMinutes} 
-                onChange={e => setForm({...form, durationMinutes: parseInt(e.target.value)})}
-                required min="5"
-                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'rgba(0,0,0,0.3)', color: '#fff' }} 
-              />
+        <div className="bg-surface-container-lowest border border-outline-variant p-xl rounded-xl flex flex-col justify-between">
+          <div className="flex justify-between items-start mb-lg">
+            <div className="p-sm bg-error/10 text-error rounded-lg">
+              <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 0"}}>local_police</span>
             </div>
           </div>
+          <div>
+            <p className="font-label-md text-on-surface-variant uppercase tracking-wider mb-xs">High-Stakes Exams</p>
+            <p className="font-display-lg text-on-surface font-bold">{assessments.filter(a => a.type === 'EXAM').length}</p>
+          </div>
+        </div>
 
-          {form.type === 'EXAM' && (
-            <div className="animate-fade-up" style={{ background: 'rgba(239, 68, 68, 0.05)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-              <h4 style={{ margin: '0 0 1rem 0', color: '#ef4444' }}>Security Settings (Proctoring)</h4>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem', cursor: 'pointer' }}>
-                <input 
-                  type="checkbox" 
-                  checked={form.requireWebcam}
-                  onChange={e => setForm({...form, requireWebcam: e.target.checked})}
-                  style={{ width: '16px', height: '16px' }}
-                />
-                <span style={{ color: 'var(--text-muted)' }}>Require Webcam Monitoring</span>
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
-                <input 
-                  type="checkbox" 
-                  checked={form.secureBrowser}
-                  onChange={e => setForm({...form, secureBrowser: e.target.checked})}
-                  style={{ width: '16px', height: '16px' }}
-                />
-                <span style={{ color: 'var(--text-muted)' }}>Force Secure Browser Lock</span>
-              </label>
+        <div className="bg-surface-container-lowest border border-outline-variant p-xl rounded-xl flex flex-col justify-between">
+          <div className="flex justify-between items-start mb-lg">
+            <div className="p-sm bg-secondary/10 text-secondary rounded-lg">
+              <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 0"}}>data_table</span>
             </div>
-          )}
+          </div>
+          <div>
+            <p className="font-label-md text-on-surface-variant uppercase tracking-wider mb-xs">Question Bank</p>
+            <p className="font-display-lg text-on-surface font-bold">1,245</p>
+          </div>
+        </div>
+      </div>
 
-          <div style={{ marginTop: 'auto', paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-            <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
-              Create Assessment
+      {/* Table Section */}
+      <section className="space-y-lg">
+        <div className="flex items-center justify-between">
+          <h3 className="font-headline-sm text-headline-sm text-on-surface">Repository</h3>
+          <div className="flex gap-md">
+            <button className="px-md py-2 bg-white border border-outline-variant rounded-lg text-on-surface-variant text-body-sm flex items-center gap-2 hover:bg-surface-container transition-colors">
+              <span className="material-symbols-outlined text-body-md" style={{fontVariationSettings: "'FILL' 0"}}>filter_list</span>
+              Filter
             </button>
           </div>
-        </form>
-      </div>
+        </div>
+
+        <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-surface-container-low border-b border-outline-variant">
+                <th className="px-lg py-4 text-label-md font-bold text-on-surface-variant">Title</th>
+                <th className="px-lg py-4 text-label-md font-bold text-on-surface-variant">Type</th>
+                <th className="px-lg py-4 text-label-md font-bold text-on-surface-variant">Course</th>
+                <th className="px-lg py-4 text-label-md font-bold text-on-surface-variant">Details</th>
+                <th className="px-lg py-4 text-label-md font-bold text-on-surface-variant text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-outline-variant/30">
+              {isLoading ? (
+                <tr><td colSpan="5" className="px-lg py-8 text-center text-on-surface-variant">Loading...</td></tr>
+              ) : assessments.map((a) => (
+                <tr key={a.id} className="hover:bg-surface-container-lowest transition-colors group">
+                  <td className="px-lg py-4 font-bold text-on-surface">{a.title}</td>
+                  <td className="px-lg py-4">
+                    <span className={`px-2 py-1 text-[10px] font-bold uppercase rounded ${a.type === 'EXAM' ? 'bg-error/10 text-error border border-error/30' : 'bg-primary/10 text-primary border border-primary/30'}`}>
+                      {a.type}
+                    </span>
+                  </td>
+                  <td className="px-lg py-4 text-body-sm text-on-surface-variant">{a.course?.title || a.courseTitle || 'Unassigned'}</td>
+                  <td className="px-lg py-4 text-body-sm text-on-surface-variant">
+                    <div className="flex items-center gap-2">
+                      <span>{a.questionCount || 0} Qs</span>
+                      <span>•</span>
+                      <span>{a.durationMinutes}m</span>
+                      {a.requireWebcam && <span title="Webcam Required" className="text-error ml-1"><span className="material-symbols-outlined text-[14px]" style={{fontVariationSettings: "'FILL' 1"}}>videocam</span></span>}
+                    </div>
+                  </td>
+                  <td className="px-lg py-4 text-right">
+                    <button className="px-md py-1 border border-outline-variant text-primary font-label-sm rounded-lg hover:bg-surface-container transition-colors">
+                      Edit Questions
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* Creation Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-md">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)}></div>
+          <div className="relative bg-surface-container-lowest w-full max-w-lg rounded-xl shadow-2xl overflow-hidden animate-fade-up flex flex-col max-h-[90vh]">
+            <div className="px-xl py-lg border-b border-outline-variant flex justify-between items-center bg-white shrink-0">
+              <h2 className="text-headline-sm font-bold text-on-surface">Create Assessment</h2>
+              <button className="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-full transition-all" onClick={() => setIsModalOpen(false)}>
+                <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 0"}}>close</span>
+              </button>
+            </div>
+            
+            <form onSubmit={handleCreate} className="p-xl space-y-md overflow-y-auto">
+              <div>
+                <label className="text-label-md text-on-surface font-semibold mb-xs block">Title</label>
+                <input 
+                  required
+                  placeholder="e.g. Midterm Examination"
+                  className="w-full border border-outline-variant rounded-lg focus:ring-primary px-md py-sm bg-white" 
+                  value={form.title}
+                  onChange={e => setForm({...form, title: e.target.value})}
+                />
+              </div>
+
+              <div>
+                <label className="text-label-md text-on-surface font-semibold mb-xs block">Course Mapping</label>
+                <select 
+                  className="w-full border border-outline-variant rounded-lg focus:ring-primary px-md py-sm bg-white"
+                  value={form.courseId}
+                  onChange={e => setForm({...form, courseId: e.target.value})}
+                >
+                  <option value="">Unassigned / Standalone</option>
+                  {courses.map(c => (
+                    <option key={c.id} value={c.id}>{c.title}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-md">
+                <div>
+                  <label className="text-label-md text-on-surface font-semibold mb-xs block">Type</label>
+                  <select 
+                    className="w-full border border-outline-variant rounded-lg focus:ring-primary px-md py-sm bg-white"
+                    value={form.type}
+                    onChange={e => setForm({...form, type: e.target.value})}
+                  >
+                    <option value="QUIZ">Quiz</option>
+                    <option value="EXAM">High-Stakes Exam</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-label-md text-on-surface font-semibold mb-xs block">Duration (Mins)</label>
+                  <input 
+                    type="number"
+                    required min="5"
+                    className="w-full border border-outline-variant rounded-lg focus:ring-primary px-md py-sm bg-white" 
+                    value={form.durationMinutes}
+                    onChange={e => setForm({...form, durationMinutes: parseInt(e.target.value)})}
+                  />
+                </div>
+              </div>
+
+              {form.type === 'EXAM' && (
+                <div className="bg-error/5 border border-error/20 p-md rounded-lg space-y-sm mt-md animate-fade-up">
+                  <h4 className="font-label-md text-error font-bold mb-xs">Security Settings (Proctoring)</h4>
+                  <label className="flex items-center gap-sm cursor-pointer">
+                    <input 
+                      type="checkbox"
+                      className="w-4 h-4 text-primary rounded border-outline-variant focus:ring-primary"
+                      checked={form.requireWebcam}
+                      onChange={e => setForm({...form, requireWebcam: e.target.checked})}
+                    />
+                    <span className="text-body-sm text-on-surface-variant">Require Webcam Monitoring</span>
+                  </label>
+                  <label className="flex items-center gap-sm cursor-pointer">
+                    <input 
+                      type="checkbox"
+                      className="w-4 h-4 text-primary rounded border-outline-variant focus:ring-primary"
+                      checked={form.secureBrowser}
+                      onChange={e => setForm({...form, secureBrowser: e.target.checked})}
+                    />
+                    <span className="text-body-sm text-on-surface-variant">Force Secure Browser Lock</span>
+                  </label>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-md pt-lg border-t border-outline-variant mt-lg shrink-0">
+                <button type="button" className="px-lg py-2 font-medium text-on-surface-variant hover:bg-surface-container-low rounded-lg" onClick={() => setIsModalOpen(false)}>Cancel</button>
+                <button type="submit" className="px-lg py-2 bg-primary text-on-primary rounded-lg font-bold shadow-sm hover:opacity-90">Create Assessment</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -26,57 +26,46 @@ const StudentLive = () => {
     fetchData();
   }, []);
 
-  if (isLoading) return <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--primary)' }}>Loading Live Schedule...</div>;
+  if (isLoading) return <div className="p-xl text-center text-primary font-bold">Loading Live Schedule...</div>;
 
   return (
-    <div style={{ padding: '3rem 2rem', paddingBottom: '6rem', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '3rem' }}>
-        <h1 style={{ fontSize: '2.5rem', margin: '0 0 0.5rem 0' }}>Live Classrooms</h1>
-        <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '1.1rem' }}>Join upcoming scheduled virtual classes and workshops.</p>
+    <div className="max-w-max-width mx-auto py-xl px-margin-mobile md:px-margin-desktop pb-[6rem] animate-fade-up">
+      <div className="mb-xl">
+        <h1 className="font-headline-md text-display-lg-mobile md:text-headline-md text-primary mb-xs">Live Classrooms</h1>
+        <p className="text-on-surface-variant text-body-lg">Join upcoming scheduled virtual classes and workshops.</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-lg">
         {sessions.map(session => {
           const isLive = session.status === 'LIVE';
           
           return (
             <div 
               key={session.id} 
-              className="glass-panel animate-fade-up" 
-              style={{ 
-                padding: '1.5rem', 
-                border: isLive ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid rgba(255,255,255,0.05)',
-                position: 'relative', overflow: 'hidden'
-              }}
+              className={`glass-panel p-md flex flex-col relative overflow-hidden ${isLive ? 'border-red-500/30' : 'border-outline-variant/20'}`}
             >
               {isLive && (
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: '#ef4444', boxShadow: '0 0 10px #ef4444' }} />
+                <div className="absolute top-0 left-0 right-0 h-1 bg-red-500 shadow-[0_0_10px_#ef4444]" />
               )}
               
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                <div style={{ 
-                  padding: '0.25rem 0.75rem', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 'bold',
-                  background: isLive ? 'rgba(239, 68, 68, 0.15)' : 'rgba(59, 130, 246, 0.15)', 
-                  color: isLive ? '#ef4444' : '#3b82f6',
-                  display: 'flex', alignItems: 'center', gap: '0.5rem'
-                }}>
-                  {isLive && <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444', display: 'inline-block', animation: 'pulse 1.5s infinite' }} />}
+              <div className="flex justify-between items-start mb-md">
+                <div className={`px-2 py-0.5 rounded-full text-[10px] font-bold flex items-center gap-xs ${isLive ? 'bg-red-500/10 text-red-500' : 'bg-blue-500/10 text-blue-500'}`}>
+                  {isLive && <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />}
                   {isLive ? 'HAPPENING NOW' : 'UPCOMING'}
                 </div>
               </div>
 
-              <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1.25rem' }}>{session.title}</h3>
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>Instructor: {session.instructor}</div>
+              <h3 className="font-headline-sm text-headline-sm mb-xs text-on-surface">{session.title}</h3>
+              <div className="text-on-surface-variant text-body-sm mb-lg">Instructor: {session.instructor}</div>
               
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#fff', fontSize: '0.9rem', marginBottom: '1.5rem', background: 'rgba(255,255,255,0.05)', padding: '0.75rem', borderRadius: '8px' }}>
+              <div className="flex items-center gap-xs text-on-surface text-body-sm mb-lg bg-surface-container p-sm rounded-lg border border-outline-variant/35">
                 <span>📅</span>
-                {new Date(session.startTime).toLocaleString()}
+                <span>{new Date(session.startTime).toLocaleString()}</span>
               </div>
 
               <button 
-                className={`btn ${isLive ? 'btn-primary' : 'btn-outline'}`}
+                className={`btn w-full mt-auto ${isLive ? 'btn-primary' : 'btn-outline'}`}
                 style={{ 
-                  width: '100%', 
                   background: isLive ? '#ef4444' : 'transparent', 
                   borderColor: isLive ? '#ef4444' : 'rgba(255,255,255,0.2)',
                   color: '#fff',

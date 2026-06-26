@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { financialService } from '../../services/api';
 
 const AdminFinancials = () => {
@@ -8,15 +8,18 @@ const AdminFinancials = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await financialService.getPayments().catch(() => ({
-          data: { data: [
+        const res = await financialService.getPayments().catch(() => ({ data: [] }));
+        const data = res?.data?.data || res?.data || [];
+        
+        if (data.length === 0) {
+          setPayments([
             { id: '1', student: 'Alice Johnson', amount: 150.00, course: 'React 101', date: '2026-06-01', status: 'COMPLETED' },
             { id: '2', student: 'Bob Smith', amount: 99.99, course: 'JS Masterclass', date: '2026-06-03', status: 'COMPLETED' },
             { id: '3', student: 'Charlie Davis', amount: 150.00, course: 'Modern CSS', date: '2026-06-04', status: 'PENDING' }
-          ]}
-        }));
-        
-        setPayments(res?.data?.data || res?.data || []);
+          ]);
+        } else {
+          setPayments(data);
+        }
       } catch (err) {
         console.error('Error fetching payments', err);
       } finally {
@@ -27,70 +30,112 @@ const AdminFinancials = () => {
     fetchData();
   }, []);
 
-  const totalRevenue = payments.reduce((acc, curr) => curr.status === 'COMPLETED' ? acc + curr.amount : acc, 0);
-
-  if (isLoading) return <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--primary)' }}>Loading Financials...</div>;
+  const totalRevenue = payments.reduce((acc, curr) => curr.status === 'COMPLETED' ? acc + (curr.amount || 0) : acc, 0);
 
   return (
-    <div style={{ paddingBottom: '4rem', maxWidth: '1200px', position: 'relative' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem' }}>
+    <div className="flex-1 max-w-max-width mx-auto w-full p-md md:p-margin-desktop space-y-3xl font-body-md bg-surface-bright">
+      {/* Header */}
+      <section className="flex flex-col md:flex-row md:items-end justify-between gap-lg">
         <div>
-          <h1 style={{ fontSize: '2.5rem', margin: '0 0 0.5rem 0' }}>Financials & Revenue</h1>
-          <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '1.1rem' }}>Track course sales, student payments, and tenant subscriptions.</p>
+          <nav className="flex items-center gap-2 text-label-sm text-on-surface-variant mb-base">
+            <span>Engagement & Utilities</span>
+            <span className="material-symbols-outlined text-[12px]" style={{fontVariationSettings: "'FILL' 0"}}>chevron_right</span>
+            <span className="text-primary font-bold">Financials</span>
+          </nav>
+          <h2 className="font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface">Financials & Revenue</h2>
+          <p className="text-body-lg text-on-surface-variant mt-xs">Track course sales, student payments, and tenant subscriptions.</p>
+        </div>
+        <div className="flex items-center gap-md">
+          <button className="px-lg py-3 rounded-lg border border-outline-variant text-on-surface-variant font-bold hover:bg-surface-container transition-colors flex items-center gap-2">
+            <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 0"}}>download</span>
+            Export CSV
+          </button>
+        </div>
+      </section>
+
+      {/* Stats Bento Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-lg mb-3xl">
+        <div className="bg-primary/10 border border-primary/20 p-xl rounded-xl flex flex-col justify-between group hover:-translate-y-1 transition-transform">
+          <div className="flex justify-between items-start mb-lg">
+            <div className="p-sm bg-primary/20 text-primary rounded-lg">
+              <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 0"}}>payments</span>
+            </div>
+            <span className="font-label-sm text-primary font-bold">MTD</span>
+          </div>
+          <div>
+            <p className="font-label-md text-primary opacity-80 uppercase tracking-wider mb-xs">Total Revenue</p>
+            <p className="font-display-lg text-primary font-bold">${totalRevenue.toFixed(2)}</p>
+          </div>
+        </div>
+        
+        <div className="bg-surface-container-lowest border border-outline-variant p-xl rounded-xl flex flex-col justify-between">
+          <div className="flex justify-between items-start mb-lg">
+            <div className="p-sm bg-surface-container-highest text-on-surface-variant rounded-lg">
+              <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 0"}}>receipt_long</span>
+            </div>
+          </div>
+          <div>
+            <p className="font-label-md text-on-surface-variant uppercase tracking-wider mb-xs">Transactions</p>
+            <p className="font-display-lg text-on-surface font-bold">{payments.length}</p>
+          </div>
+        </div>
+
+        <div className="bg-surface-container-lowest border border-outline-variant p-xl rounded-xl flex flex-col justify-between">
+          <div className="flex justify-between items-start mb-lg">
+            <div className="p-sm bg-secondary/10 text-secondary rounded-lg">
+              <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 0"}}>card_membership</span>
+            </div>
+          </div>
+          <div>
+            <p className="font-label-md text-on-surface-variant uppercase tracking-wider mb-xs">Active Subscriptions</p>
+            <p className="font-display-lg text-on-surface font-bold">24</p>
+          </div>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-        <div className="glass-panel animate-fade-up" style={{ padding: '1.5rem', background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1), transparent)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-          <div style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '1px', marginBottom: '0.5rem' }}>Total Revenue (MTD)</div>
-          <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#10b981' }}>${totalRevenue.toFixed(2)}</div>
+      {/* Table Section */}
+      <section className="space-y-lg">
+        <div className="flex items-center justify-between">
+          <h3 className="font-headline-sm text-headline-sm text-on-surface">Recent Transactions</h3>
+          <div className="flex gap-md">
+            <button className="px-md py-2 bg-white border border-outline-variant rounded-lg text-on-surface-variant text-body-sm flex items-center gap-2 hover:bg-surface-container transition-colors">
+              <span className="material-symbols-outlined text-body-md" style={{fontVariationSettings: "'FILL' 0"}}>filter_list</span>
+              Filter
+            </button>
+          </div>
         </div>
-        <div className="glass-panel animate-fade-up" style={{ padding: '1.5rem' }}>
-          <div style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '1px', marginBottom: '0.5rem' }}>Transactions</div>
-          <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#fff' }}>{payments.length}</div>
-        </div>
-        <div className="glass-panel animate-fade-up" style={{ padding: '1.5rem' }}>
-          <div style={{ color: 'var(--text-muted)', textTransform: 'uppercase', fontSize: '0.8rem', letterSpacing: '1px', marginBottom: '0.5rem' }}>Active Subscriptions</div>
-          <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#fff' }}>24</div>
-        </div>
-      </div>
 
-      <div className="glass-panel animate-fade-up" style={{ padding: '2rem' }}>
-        <h3 style={{ margin: '0 0 1.5rem 0' }}>Recent Transactions</h3>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead>
-            <tr style={{ color: 'var(--text-muted)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-              <th style={{ padding: '1rem' }}>Student</th>
-              <th style={{ padding: '1rem' }}>Course / Plan</th>
-              <th style={{ padding: '1rem' }}>Date</th>
-              <th style={{ padding: '1rem' }}>Amount</th>
-              <th style={{ padding: '1rem' }}>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {payments.map(p => (
-              <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
-                <td style={{ padding: '1.25rem 1rem', fontWeight: 'bold', color: '#fff' }}>{p.student}</td>
-                <td style={{ padding: '1.25rem 1rem', color: 'var(--text-muted)' }}>{p.course}</td>
-                <td style={{ padding: '1.25rem 1rem', color: 'var(--text-muted)' }}>{p.date}</td>
-                <td style={{ padding: '1.25rem 1rem', fontWeight: 'bold', color: '#fff' }}>${p.amount.toFixed(2)}</td>
-                <td style={{ padding: '1.25rem 1rem' }}>
-                  <span style={{ 
-                    padding: '0.3rem 0.6rem', 
-                    borderRadius: '99px', 
-                    fontSize: '0.75rem', 
-                    fontWeight: 'bold',
-                    background: p.status === 'COMPLETED' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)', 
-                    color: p.status === 'COMPLETED' ? '#10b981' : '#f59e0b',
-                  }}>
-                    {p.status}
-                  </span>
-                </td>
+        <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-surface-container-low border-b border-outline-variant">
+                <th className="px-lg py-4 text-label-md font-bold text-on-surface-variant">Student</th>
+                <th className="px-lg py-4 text-label-md font-bold text-on-surface-variant">Course / Plan</th>
+                <th className="px-lg py-4 text-label-md font-bold text-on-surface-variant">Date</th>
+                <th className="px-lg py-4 text-label-md font-bold text-on-surface-variant">Amount</th>
+                <th className="px-lg py-4 text-label-md font-bold text-on-surface-variant">Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody className="divide-y divide-outline-variant/30">
+              {isLoading ? (
+                <tr><td colSpan="5" className="px-lg py-8 text-center text-on-surface-variant">Loading...</td></tr>
+              ) : payments.map((p) => (
+                <tr key={p.id} className="hover:bg-surface-container-lowest transition-colors">
+                  <td className="px-lg py-4 font-medium text-on-surface">{p.student}</td>
+                  <td className="px-lg py-4 text-body-sm text-on-surface-variant">{p.course}</td>
+                  <td className="px-lg py-4 text-body-sm text-on-surface-variant">{p.date}</td>
+                  <td className="px-lg py-4 font-bold text-on-surface">${(p.amount || 0).toFixed(2)}</td>
+                  <td className="px-lg py-4">
+                    <span className={`px-2 py-1 text-[10px] font-bold uppercase rounded ${p.status === 'COMPLETED' ? 'bg-primary/10 text-primary' : 'bg-tertiary/10 text-tertiary'}`}>
+                      {p.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
   );
 };

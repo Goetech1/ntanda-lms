@@ -1,11 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { ArrowLeft, PlayCircle, CheckCircle2, Circle, Save, Loader2, FileText } from 'lucide-react';
+import { courseService, studentNoteService } from '../../services/api';
 
 const CoursePlayer = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [course, setCourse] = useState(null);
+  const [activeLessonId, setActiveLessonId] = useState('');
+  const [isLoadingCourse, setIsLoadingCourse] = useState(true);
+  const [courseError, setCourseError] = useState('');
+  
+  // Notes State
+  const [noteText, setNoteText] = useState('');
+  const [isSavingNote, setIsSavingNote] = useState(false);
+  const [noteStatus, setNoteStatus] = useState('');
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -13,59 +24,129 @@ const CoursePlayer = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const course = {
-    title: 'React Masterclass',
-    instructor: 'Jane Doe',
-    modules: [
-      {
-        title: 'Module 1: Getting Started',
-        lessons: [
-          { id: 'l1', title: 'Introduction to React', duration: '5:30', isPlaying: false, completed: true },
-          { id: 'l2', title: 'Setting up the Environment', duration: '12:45', isPlaying: true, completed: false },
-          { id: 'l3', title: 'JSX Fundamentals', duration: '18:20', isPlaying: false, completed: false }
-        ]
-      },
-      {
-        title: 'Module 2: State & Props',
-        lessons: [
-          { id: 'l4', title: 'Understanding State', duration: '20:15', isPlaying: false, completed: false },
-          { id: 'l5', title: 'Passing Props', duration: '15:10', isPlaying: false, completed: false }
-        ]
+  useEffect(() => {
+    const fetchCourse = async () => {
+      setIsLoadingCourse(true);
+      setCourseError('');
+      try {
+        const res = await courseService.getCourseById(id);
+        const data = res.data?.data || res.data;
+        setCourse(data);
+        const firstLesson = data?.modules?.flatMap(module => module.lessons || [])[0];
+        setActiveLessonId(firstLesson?.id || '');
+      } catch (error) {
+        console.error('Could not fetch course', error);
+        setCourseError(error.response?.data?.message || 'Unable to load course content.');
+      } finally {
+        setIsLoadingCourse(false);
       }
-    ]
+    };
+
+    fetchCourse();
+  }, [id]);
+
+  // Fetch notes when lesson changes
+  useEffect(() => {
+    const fetchNotes = async () => {
+      setNoteText('');
+      setNoteStatus('');
+      try {
+        const res = await studentNoteService.getNote(course.id, activeLessonId);
+        if (res.data?.data) {
+          setNoteText(res.data.data.note_text);
+        }
+      } catch (error) {
+        console.error("Could not fetch note", error);
+      }
+    };
+    if (activeTab === 'notes' && course?.id && activeLessonId) {
+      fetchNotes();
+    }
+  }, [activeLessonId, activeTab, course?.id]);
+
+  const handleSaveNote = async () => {
+    setIsSavingNote(true);
+    setNoteStatus('');
+    try {
+      if (!course?.id || !activeLessonId) return;
+      await studentNoteService.saveNote(course.id, activeLessonId, noteText);
+      setNoteStatus('Saved successfully');
+      setTimeout(() => setNoteStatus(''), 3000);
+    } catch (error) {
+      console.error("Failed to save note", error);
+      setNoteStatus('Error saving');
+    } finally {
+      setIsSavingNote(false);
+    }
   };
 
+  const getActiveLesson = () => {
+    for (const mod of course.modules) {
+      const found = mod.lessons.find(l => l.id === activeLessonId);
+      if (found) return found;
+    }
+    return course.modules?.[0]?.lessons?.[0] || null;
+  };
+
+  if (isLoadingCourse) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-slate-950 text-slate-400">
+        <Loader2 className="w-8 h-8 animate-spin text-[var(--primary)]" />
+      </div>
+    );
+  }
+
+  if (courseError || !course) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-slate-950 text-slate-400">
+        {courseError || 'Course content not found.'}
+      </div>
+    );
+  }
+
+  const activeLesson = getActiveLesson();
+
   return (
-    <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', minHeight: '100vh', background: '#f8fafc', color: '#1e293b', fontFamily: 'system-ui, sans-serif' }}>
+    <div className={`flex min-h-screen bg-slate-950 text-slate-200 ${isMobile ? 'flex-col' : 'flex-row'}`}>
       
       {/* Main Player Area */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div className="flex-1 flex flex-col min-w-0">
         
         {/* Top Navbar */}
-        <div style={{ height: '60px', background: '#fff', borderBottom: '1px solid #e2e8f0', display: 'flex', alignItems: 'center', padding: '0 1.5rem', gap: '1rem' }}>
-          <button onClick={() => navigate('/student')} style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '1.25rem', color: '#64748b' }}>←</button>
-          <h1 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 'bold' }}>{course.title}</h1>
+        <div className="h-16 bg-slate-900 border-b border-slate-800 flex items-center px-6 gap-4 shrink-0">
+          <button 
+            onClick={() => navigate('/student')} 
+            className="text-slate-400 hover:text-white transition-colors"
+          >
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+          <h1 className="font-bold text-white truncate">{course.title}</h1>
         </div>
 
-        {/* Video Player Placeholder */}
-        <div style={{ width: '100%', background: '#000', aspectRatio: '16/9', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-          <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '2rem', cursor: 'pointer', boxShadow: '0 0 20px var(--primary-glow)' }}>
-            ▶
+        <div className="w-full bg-black aspect-video flex items-center justify-center relative shrink-0">
+          {activeLesson?.video_url ? (
+            <iframe title={activeLesson.title} src={activeLesson.video_url} className="w-full h-full" allowFullScreen />
+          ) : (
+            <div className="w-16 h-16 rounded-full bg-[var(--primary)] flex items-center justify-center text-white shadow-[0_0_30px_rgba(var(--primary-rgb),0.5)]">
+              <PlayCircle className="w-10 h-10 ml-1" />
+            </div>
+          )}
+          <div className="absolute bottom-4 left-4 text-white font-bold tracking-wide drop-shadow-md">
+            {activeLesson?.title}
           </div>
-          <div style={{ position: 'absolute', bottom: '1rem', left: '1rem', color: '#fff', fontWeight: 'bold' }}>Setting up the Environment</div>
         </div>
 
         {/* Tabs Below Player */}
-        <div style={{ background: '#fff', borderBottom: '1px solid #e2e8f0', display: 'flex', padding: '0 1.5rem' }}>
+        <div className="bg-slate-900 border-b border-slate-800 flex px-6 shrink-0 overflow-x-auto custom-scrollbar">
           {['overview', 'q&a', 'notes', 'resources'].map(tab => (
             <button 
               key={tab}
               onClick={() => setActiveTab(tab)}
-              style={{ 
-                background: 'transparent', border: 'none', borderBottom: activeTab === tab ? '3px solid var(--primary)' : '3px solid transparent',
-                padding: '1rem 1.5rem', fontWeight: activeTab === tab ? 'bold' : 'normal', color: activeTab === tab ? 'var(--primary)' : '#64748b',
-                cursor: 'pointer', textTransform: 'capitalize'
-              }}
+              className={`px-6 py-4 font-medium capitalize whitespace-nowrap transition-colors border-b-2 ${
+                activeTab === tab 
+                  ? 'border-[var(--primary)] text-[var(--primary)]' 
+                  : 'border-transparent text-slate-400 hover:text-slate-300'
+              }`}
             >
               {tab}
             </button>
@@ -73,61 +154,98 @@ const CoursePlayer = () => {
         </div>
 
         {/* Tab Content */}
-        <div style={{ padding: '2rem 1.5rem', flex: 1, background: '#f8fafc' }}>
+        <div className="p-6 flex-1 bg-slate-950 overflow-y-auto custom-scrollbar">
           {activeTab === 'overview' && (
-            <div>
-              <h2 style={{ marginTop: 0 }}>About this Lesson</h2>
-              <p style={{ color: '#475569', lineHeight: 1.6 }}>In this lesson, we will install Node.js, set up Vite, and prepare our development environment for building modern React applications. Make sure to download the attached resources.</p>
+            <div className="max-w-3xl animate-fade-up">
+              <h2 className="text-xl font-bold text-white mb-4">About this Lesson</h2>
+              <p className="text-slate-400 leading-relaxed">
+                In this lesson, we will cover the fundamentals required to master the topic. Make sure to take notes and download the attached resources if needed.
+              </p>
               
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '2rem', padding: '1rem', background: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-                <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: '#cbd5e1' }} />
+              <div className="flex items-center gap-4 mt-8 p-4 bg-slate-900 border border-slate-800 rounded-xl">
+                <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-slate-500 font-bold">
+                  {(course.instructor?.full_name || 'I').charAt(0)}
+                </div>
                 <div>
-                  <div style={{ fontWeight: 'bold' }}>Instructor: {course.instructor}</div>
-                  <div style={{ fontSize: '0.85rem', color: '#64748b' }}>Senior React Developer</div>
+                  <div className="font-bold text-white">Instructor: {course.instructor?.full_name || 'Unassigned'}</div>
+                  <div className="text-sm text-slate-400">{course.instructor?.email || 'No instructor email recorded'}</div>
                 </div>
               </div>
             </div>
           )}
-          {activeTab === 'q&a' && <div style={{ color: '#64748b' }}>Search past questions or ask a new one...</div>}
+          
+          {activeTab === 'notes' && (
+            <div className="max-w-3xl flex flex-col h-full animate-fade-up">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-[var(--primary)]" /> My Notes
+                </h2>
+                <div className="flex items-center gap-3">
+                  {noteStatus && <span className={`text-sm ${noteStatus === 'Error saving' ? 'text-red-400' : 'text-emerald-400'}`}>{noteStatus}</span>}
+                  <button 
+                    onClick={handleSaveNote}
+                    disabled={isSavingNote}
+                    className="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
+                  >
+                    {isSavingNote ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                    Save Note
+                  </button>
+                </div>
+              </div>
+              <textarea 
+                value={noteText}
+                onChange={(e) => setNoteText(e.target.value)}
+                placeholder="Type your personal notes here... They are automatically linked to this lesson."
+                className="flex-1 w-full bg-slate-900 border border-slate-800 rounded-xl p-4 text-white placeholder:text-slate-600 focus:outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)] resize-none min-h-[300px]"
+              />
+            </div>
+          )}
+
+          {activeTab === 'q&a' && <div className="text-slate-400">Search past questions or ask a new one...</div>}
+          {activeTab === 'resources' && <div className="text-slate-400">No resources attached to this lesson.</div>}
         </div>
 
       </div>
 
       {/* Sidebar: Curriculum */}
-      <div style={{ width: isMobile ? '100%' : '350px', background: '#fff', borderLeft: isMobile ? 'none' : '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', height: isMobile ? 'auto' : '100vh', position: isMobile ? 'static' : 'sticky', top: 0 }}>
-        <div style={{ padding: '1.5rem', borderBottom: '1px solid #e2e8f0' }}>
-          <h2 style={{ margin: 0, fontSize: '1.25rem' }}>Course Content</h2>
+      <div className={`${isMobile ? 'w-full' : 'w-80'} bg-slate-900 border-l border-slate-800 flex flex-col shrink-0 ${!isMobile ? 'h-screen sticky top-0' : ''}`}>
+        <div className="p-5 border-b border-slate-800 shrink-0">
+          <h2 className="font-bold text-white text-lg">Course Content</h2>
         </div>
         
-        <div style={{ flex: 1, overflowY: 'auto' }}>
-          {course.modules.map((mod, i) => (
-            <div key={i} style={{ borderBottom: '1px solid #e2e8f0' }}>
-              <div style={{ padding: '1rem 1.5rem', background: '#f1f5f9', fontWeight: 'bold', fontSize: '0.9rem', color: '#334155' }}>
+        <div className="flex-1 overflow-y-auto custom-scrollbar">
+          {(course.modules || []).map((mod, i) => (
+            <div key={i} className="border-b border-slate-800/50">
+              <div className="p-4 bg-slate-950/50 font-semibold text-sm text-slate-300">
                 {mod.title}
               </div>
               <div>
-                {mod.lessons.map(lesson => (
-                  <div 
-                    key={lesson.id} 
-                    style={{ 
-                      padding: '1rem 1.5rem', display: 'flex', alignItems: 'flex-start', gap: '1rem', 
-                      background: lesson.isPlaying ? '#eff6ff' : '#fff', cursor: 'pointer',
-                      borderLeft: lesson.isPlaying ? '3px solid var(--primary)' : '3px solid transparent'
-                    }}
-                  >
-                    <div style={{ color: lesson.completed ? '#10b981' : '#cbd5e1', fontSize: '1.2rem', marginTop: '-2px' }}>
-                      {lesson.completed ? '✓' : '○'}
-                    </div>
-                    <div>
-                      <div style={{ color: lesson.isPlaying ? 'var(--primary)' : '#1e293b', fontWeight: lesson.isPlaying ? 'bold' : 'normal', fontSize: '0.95rem', marginBottom: '0.25rem' }}>
-                        {lesson.title}
+                {(mod.lessons || []).map(lesson => {
+                  const isActive = lesson.id === activeLessonId;
+                  return (
+                    <div 
+                      key={lesson.id} 
+                      onClick={() => setActiveLessonId(lesson.id)}
+                      className={`p-4 flex items-start gap-3 cursor-pointer transition-colors border-l-4 ${
+                        isActive 
+                          ? 'bg-[var(--primary)]/10 border-[var(--primary)]' 
+                          : 'bg-transparent border-transparent hover:bg-slate-800/50'
+                      }`}
+                    >
+                      <div className={`mt-0.5 ${lesson.completed ? 'text-emerald-500' : 'text-slate-600'}`}>
+                        {lesson.completed ? <CheckCircle2 className="w-5 h-5" /> : <Circle className="w-5 h-5" />}
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem', color: '#64748b' }}>
-                        <span>▶️</span> {lesson.duration}
+                      <div>
+                        <div className={`text-sm mb-1 ${isActive ? 'text-[var(--primary)] font-semibold' : 'text-slate-300'}`}>
+                          {lesson.title}
+                        </div>
+                        <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                          <PlayCircle className="w-3 h-3" /> {lesson.duration_minutes ? `${lesson.duration_minutes} min` : 'Self-paced'}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))}

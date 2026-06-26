@@ -7,6 +7,7 @@ const AdminCourseCurriculum = () => {
   const [course, setCourse] = useState(null);
   const [modules, setModules] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
   // UI State
   const [activeModuleForm, setActiveModuleForm] = useState(false);
@@ -17,35 +18,23 @@ const AdminCourseCurriculum = () => {
 
   const fetchCurriculum = async () => {
     setIsLoading(true);
+    setError('');
     try {
-      // Parallel fetch for course and modules
       const [courseRes, modulesRes] = await Promise.all([
-        courseService.getCourseById(id).catch(() => null),
-        courseModuleService.getModulesByCourse(id).catch(() => null)
+        courseService.getCourseById(id),
+        courseModuleService.getModulesByCourse(id)
       ]);
 
-      const cData = courseRes?.data?.data || courseRes?.data || { id, title: 'Sample Premium Course', status: 'DRAFT' };
+      const cData = courseRes?.data?.data || courseRes?.data;
       const mData = modulesRes?.data?.data || modulesRes?.data || [];
       
       setCourse(cData);
-      
-      if (mData.length === 0) throw new Error('No modules');
-      setModules(mData);
+      setModules(Array.isArray(mData) ? mData : []);
     } catch (err) {
       console.error(err);
-      // Premium Mock Fallback
-      if (!course) {
-        setCourse({ id, title: 'Advanced React Patterns', status: 'DRAFT' });
-      }
-      setModules([
-        { 
-          id: 'm1', title: 'Module 1: Introduction & Setup', orderIndex: 1,
-          lessons: [
-            { id: 'l1', title: '1. Welcome to the Course', type: 'VIDEO' },
-            { id: 'l2', title: '2. Environment Setup Guide', type: 'TEXT' }
-          ]
-        }
-      ]);
+      setCourse(null);
+      setModules([]);
+      setError(err.response?.data?.message || 'Failed to load course curriculum.');
     } finally {
       setIsLoading(false);
     }
@@ -66,22 +55,13 @@ const AdminCourseCurriculum = () => {
     };
 
     try {
-      const res = await courseModuleService.createModule(payload).catch(() => {
-        // Mock fallback
-        const mockMod = { id: 'mock-m-' + Math.random(), ...payload, lessons: [] };
-        setModules([...modules, mockMod]);
-        throw new Error('Inserted mock module');
-      });
-
-      if (res?.data?.data) {
-        setModules([...modules, { ...res.data.data, lessons: [] }]);
-      }
+      const res = await courseModuleService.createModule(payload);
+      const module = res?.data?.data || res?.data;
+      setModules([...modules, { ...module, lessons: module.lessons || [] }]);
       setModuleTitle('');
       setActiveModuleForm(false);
     } catch (err) {
-      console.log('Module created (mock)');
-      setModuleTitle('');
-      setActiveModuleForm(false);
+      setError(err.response?.data?.message || 'Failed to create module.');
     }
   };
 
@@ -101,35 +81,20 @@ const AdminCourseCurriculum = () => {
     };
 
     try {
-      const res = await lessonService.createLesson(payload).catch(() => {
-        // Mock fallback
-        const updatedModules = modules.map(m => {
-          if (m.id === moduleId) {
-            const newLessons = [...(m.lessons || []), { id: 'mock-l-' + Math.random(), ...payload }];
-            return { ...m, lessons: newLessons };
-          }
-          return m;
-        });
-        setModules(updatedModules);
-        throw new Error('Inserted mock lesson');
+      const res = await lessonService.createLesson(payload);
+      const lesson = res?.data?.data || res?.data;
+      const updatedModules = modules.map(m => {
+        if (m.id === moduleId) {
+          return { ...m, lessons: [...(m.lessons || []), lesson] };
+        }
+        return m;
       });
-
-      if (res?.data?.data) {
-        const updatedModules = modules.map(m => {
-          if (m.id === moduleId) {
-            return { ...m, lessons: [...(m.lessons || []), res.data.data] };
-          }
-          return m;
-        });
-        setModules(updatedModules);
-      }
+      setModules(updatedModules);
       
       setLessonData({ title: '', content: '', videoUrl: '' });
       setActiveLessonForm(null);
     } catch (err) {
-      console.log('Lesson created (mock)');
-      setLessonData({ title: '', content: '', videoUrl: '' });
-      setActiveLessonForm(null);
+      setError(err.response?.data?.message || 'Failed to create lesson.');
     }
   };
 
@@ -152,6 +117,12 @@ const AdminCourseCurriculum = () => {
           </div>
         </div>
       </div>
+
+      {error && (
+        <div style={{ maxWidth: '800px', marginBottom: '1rem', padding: '1rem', border: '1px solid #ef4444', borderRadius: '8px', color: '#ef4444', background: 'rgba(239,68,68,0.08)' }}>
+          {error}
+        </div>
+      )}
 
       <div style={{ maxWidth: '800px' }}>
         {/* Modules List */}

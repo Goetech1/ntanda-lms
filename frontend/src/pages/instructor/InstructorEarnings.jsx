@@ -1,97 +1,185 @@
 import { useState, useEffect } from 'react';
-import { instructorPortalService } from '../../services/api';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { DollarSign, Users, BookOpen, GraduationCap, ArrowUpRight, Loader2 } from 'lucide-react';
+import { analyticsService } from '../../services/api';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 
 const InstructorEarnings = () => {
-  const [earningsData, setEarningsData] = useState(null);
+  const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await instructorPortalService.getMyEarnings().catch(() => ({
-          data: { data: {
-            availableBalance: 1250.00,
-            pendingClearance: 350.00,
-            totalLifetime: 4500.00,
-            revenueShare: '70%',
-            recentTransactions: [
-              { id: '1', date: '2026-06-03', description: 'Course Sale: React Masterclass', amount: 49.99, myCut: 34.99 },
-              { id: '2', date: '2026-06-01', description: 'Course Sale: React Masterclass', amount: 49.99, myCut: 34.99 },
-              { id: '3', date: '2026-05-28', description: 'Monthly Payout to Bank', amount: -1500.00, myCut: -1500.00 }
-            ]
-          }}
-        }));
-        setEarningsData(res?.data?.data || res?.data);
-      } catch (err) {
-        console.error('Error fetching earnings', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
+    fetchAnalytics();
   }, []);
 
-  if (isLoading) return <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--primary)' }}>Loading Financials...</div>;
+  const fetchAnalytics = async () => {
+    try {
+      const res = await analyticsService.getInstructorDashboard();
+      setData(res.data);
+    } catch (error) {
+      console.error('Failed to fetch instructor analytics', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-[var(--primary)]" />
+      </div>
+    );
+  }
+
+  if (!data) return null;
+
+  const { kpis, revenueByCourse, enrollmentChart } = data;
 
   return (
-    <div style={{ maxWidth: '1200px', position: 'relative', paddingBottom: '4rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem' }}>
-        <div>
-          <h1 style={{ fontSize: '2.5rem', margin: '0 0 0.5rem 0' }}>Earnings & Payouts</h1>
-          <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '1.1rem' }}>Track your revenue share and request payouts.</p>
-        </div>
-        <button className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span>💳</span> Request Payout
-        </button>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-white tracking-tight">Analytics & Earnings</h1>
+        <p className="text-slate-400 mt-1">Overview of your performance, revenue, and student engagement.</p>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
-        <div className="glass-panel animate-fade-up" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', background: 'linear-gradient(135deg, rgba(16,185,129,0.1), transparent)' }}>
-          <div style={{ color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Available for Payout</div>
-          <div style={{ fontSize: '3rem', fontWeight: 'bold', color: '#10b981', marginBottom: '0.5rem' }}>${earningsData.availableBalance.toFixed(2)}</div>
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Your Share: {earningsData.revenueShare}</div>
-        </div>
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-sm relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <CardContent className="p-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm font-medium text-slate-400">Total Revenue</p>
+                <h3 className="text-3xl font-bold text-white mt-1">${kpis.totalRevenue?.toLocaleString() || '0'}</h3>
+              </div>
+              <div className="h-10 w-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400">
+                <DollarSign className="h-5 w-5" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-        <div className="glass-panel animate-fade-up" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', animationDelay: '0.1s' }}>
-          <div style={{ color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Pending Clearance</div>
-          <div style={{ fontSize: '3rem', fontWeight: 'bold', color: '#f59e0b', marginBottom: '0.5rem' }}>${earningsData.pendingClearance.toFixed(2)}</div>
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Clears in 30 days</div>
-        </div>
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-sm relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <CardContent className="p-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm font-medium text-slate-400">Active Students</p>
+                <h3 className="text-3xl font-bold text-white mt-1">{kpis.totalStudents?.toLocaleString() || '0'}</h3>
+              </div>
+              <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400">
+                <Users className="h-5 w-5" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-        <div className="glass-panel animate-fade-up" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', animationDelay: '0.2s' }}>
-          <div style={{ color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Lifetime Earnings</div>
-          <div style={{ fontSize: '3rem', fontWeight: 'bold', color: '#fff', marginBottom: '0.5rem' }}>${earningsData.totalLifetime.toFixed(2)}</div>
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Since joining</div>
-        </div>
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-sm relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-[var(--primary)]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <CardContent className="p-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm font-medium text-slate-400">Total Enrollments</p>
+                <h3 className="text-3xl font-bold text-white mt-1">{kpis.totalEnrollments?.toLocaleString() || '0'}</h3>
+              </div>
+              <div className="h-10 w-10 rounded-lg bg-[var(--primary)]/10 flex items-center justify-center text-[var(--primary)]">
+                <GraduationCap className="h-5 w-5" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-sm relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <CardContent className="p-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm font-medium text-slate-400">Published Courses</p>
+                <h3 className="text-3xl font-bold text-white mt-1">{kpis.totalCourses || '0'}</h3>
+              </div>
+              <div className="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400">
+                <BookOpen className="h-5 w-5" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="glass-panel animate-fade-up" style={{ padding: '2rem', animationDelay: '0.3s' }}>
-        <h3 style={{ margin: '0 0 1.5rem 0' }}>Transaction History</h3>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead>
-            <tr style={{ color: 'var(--text-muted)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-              <th style={{ padding: '1rem' }}>Date</th>
-              <th style={{ padding: '1rem' }}>Description</th>
-              <th style={{ padding: '1rem' }}>Sale Amount</th>
-              <th style={{ padding: '1rem', textAlign: 'right' }}>Your Earnings</th>
-            </tr>
-          </thead>
-          <tbody>
-            {earningsData.recentTransactions.map(tx => (
-              <tr key={tx.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)' }}>
-                <td style={{ padding: '1.25rem 1rem', color: 'var(--text-muted)' }}>{tx.date}</td>
-                <td style={{ padding: '1.25rem 1rem', color: '#fff' }}>
-                  {tx.myCut < 0 ? <span style={{ color: '#ef4444', marginRight: '0.5rem' }}>↗</span> : <span style={{ color: '#10b981', marginRight: '0.5rem' }}>↘</span>}
-                  {tx.description}
-                </td>
-                <td style={{ padding: '1.25rem 1rem', color: 'var(--text-muted)' }}>{tx.amount > 0 ? `$${tx.amount.toFixed(2)}` : '-'}</td>
-                <td style={{ padding: '1.25rem 1rem', textAlign: 'right', fontWeight: 'bold', color: tx.myCut > 0 ? '#10b981' : '#ef4444' }}>
-                  {tx.myCut > 0 ? '+' : ''}{tx.myCut.toFixed(2)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Chart: Enrollments Over Time */}
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-sm lg:col-span-2">
+          <CardHeader className="border-b border-slate-800">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg">Enrollments (Last 30 Days)</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6">
+            {enrollmentChart?.length > 0 ? (
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={enrollmentChart} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
+                    <XAxis 
+                      dataKey="date" 
+                      stroke="#64748b" 
+                      fontSize={12} 
+                      tickLine={false} 
+                      axisLine={false}
+                      tickFormatter={(val) => new Date(val).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                    />
+                    <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px' }}
+                      itemStyle={{ color: '#fff' }}
+                      labelFormatter={(val) => new Date(val).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
+                    />
+                    <Area type="monotone" dataKey="count" stroke="var(--primary)" strokeWidth={2} fillOpacity={1} fill="url(#colorCount)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-slate-500">
+                Not enough data to display trend
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Secondary Chart: Revenue by Course */}
+        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-sm">
+          <CardHeader className="border-b border-slate-800">
+            <CardTitle className="text-lg">Revenue by Course</CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            {revenueByCourse?.length > 0 ? (
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={revenueByCourse} layout="vertical" margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" horizontal={true} vertical={false} />
+                    <XAxis type="number" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val}`} />
+                    <YAxis dataKey="name" type="category" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} width={100} tickFormatter={(val) => val.length > 15 ? `${val.substring(0,15)}...` : val} />
+                    <Tooltip 
+                      cursor={{ fill: '#1e293b' }}
+                      contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px' }}
+                      formatter={(value) => [`$${value}`, 'Revenue']}
+                    />
+                    <Bar dataKey="value" fill="var(--primary)" radius={[0, 4, 4, 0]} barSize={20} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-slate-500">
+                No revenue data available
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

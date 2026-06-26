@@ -1,27 +1,39 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { User, Mail, Lock, Compass, ShieldCheck, Users, Globe2 } from 'lucide-react';
 import { authService } from '../services/api';
-import { Mail, Lock, User, ArrowRight, Sparkles, ShieldCheck } from 'lucide-react';
+import { useTenantBranding } from '../components/TenantBrandingProvider';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/Card';
 
 const Register = () => {
+  const { tenant } = useTenantBranding();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState(0);
   const navigate = useNavigate();
 
+  // Password strength calculation
+  useEffect(() => {
+    let score = 0;
+    if (password.length >= 8) score += 1;
+    if (/[A-Z]/.test(password)) score += 1;
+    if (/\d/.test(password)) score += 1;
+    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score += 1;
+    setPasswordStrength(score);
+  }, [password]);
+
   const validatePassword = (pass) => {
-    const minLength = pass.length >= 8;
-    const hasUpper = /[A-Z]/.test(pass);
-    const hasNumber = /\d/.test(pass);
-    const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(pass);
-    
-    if (!minLength) return 'Password must be at least 8 characters';
-    if (!hasUpper) return 'Password must contain 1 uppercase letter';
-    if (!hasNumber) return 'Password must contain 1 number';
-    if (!hasSpecial) return 'Password must contain 1 special character';
+    if (pass.length < 8) return 'Password must be at least 8 characters';
+    if (!/[A-Z]/.test(pass)) return 'Password must contain 1 uppercase letter';
+    if (!/\d/.test(pass)) return 'Password must contain 1 number';
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(pass)) return 'Password must contain 1 special character';
     return null;
   };
 
@@ -29,6 +41,11 @@ const Register = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
 
     const passwordError = validatePassword(password);
     if (passwordError) {
@@ -54,270 +71,217 @@ const Register = () => {
   };
 
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center',
-      position: 'relative',
-      overflow: 'hidden',
-      backgroundColor: '#050505'
-    }}>
-      {/* Animated Background Elements */}
-      <div style={{
-        position: 'absolute', top: '-10%', left: '-10%', width: '40vw', height: '40vw',
-        background: 'radial-gradient(circle, rgba(0,229,255,0.15) 0%, rgba(0,0,0,0) 70%)',
-        filter: 'blur(60px)', zIndex: 0,
-        animation: 'float 10s ease-in-out infinite'
-      }} />
-      <div style={{
-        position: 'absolute', bottom: '-20%', right: '-10%', width: '50vw', height: '50vw',
-        background: 'radial-gradient(circle, rgba(255,51,102,0.1) 0%, rgba(0,0,0,0) 70%)',
-        filter: 'blur(80px)', zIndex: 0,
-        animation: 'float 15s ease-in-out infinite reverse'
-      }} />
-
-      {/* Main Glass Container */}
-      <div className="glass-panel animate-fade-up" style={{
-        display: 'flex',
-        width: '100%',
-        maxWidth: '1200px',
-        minHeight: '700px',
-        margin: '2rem',
-        padding: '0',
-        zIndex: 1,
-        overflow: 'hidden',
-        border: '1px solid rgba(255,255,255,0.05)',
-        boxShadow: '0 25px 50px -12px rgba(0,0,0,0.7)',
-        position: 'relative'
-      }}>
-        
-        {/* Left Side - Brand & Graphics */}
-        <div style={{ 
-          flex: '1', 
-          position: 'relative',
-          padding: '4rem',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'space-between',
-          background: 'linear-gradient(135deg, rgba(20,20,25,0.8), rgba(10,10,12,0.9))',
-          borderRight: '1px solid rgba(255,255,255,0.05)'
-        }} className="desktop-only-flex">
-          
-          <div>
-            <Link to="/" style={{ display: 'inline-block', marginBottom: '4rem' }}>
-              <img src="/ntanda-logo.jpeg" alt="Ntanda LMS" style={{ height: '50px', borderRadius: '12px', boxShadow: '0 8px 16px rgba(0,0,0,0.3)' }} />
-            </Link>
-            
-            <h1 style={{ 
-              fontSize: '3.5rem', 
-              fontWeight: '800', 
-              lineHeight: '1.1',
-              marginBottom: '1.5rem',
-              background: 'linear-gradient(to right, #fff, #a5b4fc)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              letterSpacing: '-1px'
-            }}>
-              Shape Your <br/>
-              <span style={{ 
-                background: 'linear-gradient(to right, #00e5ff, #0088ff)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent'
-              }}>Future.</span>
-            </h1>
-            
-            <p style={{ 
-              fontSize: '1.1rem', 
-              color: 'var(--text-muted)', 
-              maxWidth: '85%',
-              lineHeight: '1.6',
-              fontWeight: '400'
-            }}>
-              Create an account today and take the first step towards mastering your craft.
-            </p>
+    <div className="min-h-screen bg-slate-50 flex flex-col lg:flex-row selection:bg-[#2563EB] selection:text-white">
+      {/* Left Side: Form */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-6 md:p-12 relative z-10 min-h-screen lg:min-h-0 order-2 lg:order-1">
+        <div className="w-full max-w-[500px] animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <div className="flex flex-col items-center mb-8">
+            {tenant?.branding?.logoUrl ? (
+              <img src={tenant.branding.logoUrl} alt={tenant.name} className="h-12 w-12 rounded-xl object-cover shadow-sm mb-4" />
+            ) : (
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-[#2563EB] to-[#1D4ED8] shadow-sm mb-4 flex items-center justify-center">
+                <span className="text-xl font-bold text-white">{tenant?.name?.charAt(0) || "N"}</span>
+              </div>
+            )}
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900">{tenant?.name || "Ntanda LMS"}</h1>
           </div>
 
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '1rem',
-            padding: '1.5rem',
-            background: 'rgba(255,255,255,0.03)',
-            borderRadius: '16px',
-            border: '1px solid rgba(255,255,255,0.05)',
-            backdropFilter: 'blur(10px)'
-          }}>
-            <div style={{ 
-              width: '48px', height: '48px', 
-              borderRadius: '50%', 
-              background: 'linear-gradient(135deg, rgba(0,229,255,0.2), rgba(0,229,255,0.05))',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: '#00e5ff'
-            }}>
-              <ShieldCheck size={24} />
-            </div>
-            <div>
-              <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: '600' }}>Secure Enterprise LMS</h4>
-              <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>Bank-grade encryption & data privacy.</p>
-            </div>
-          </div>
+          <Card className="w-full bg-[#FFFFFF] shadow-[0_12px_32px_rgba(0,0,0,0.08)] rounded-[16px] border-0">
+            <CardHeader className="space-y-2 text-center pb-6">
+              <CardTitle className="text-2xl font-bold text-slate-900">Create an account</CardTitle>
+              <CardDescription className="text-slate-600 text-base">
+                Enter your details to start your learning journey
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {error && (
+                <div className="mb-6 p-4 rounded-lg bg-red-50 text-red-700 border border-red-200 text-sm flex items-center font-medium animate-in shake">
+                  {error}
+                </div>
+              )}
+              {success && (
+                <div className="mb-6 p-4 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-sm flex items-center font-medium animate-in slide-in-from-top-2">
+                  {success}
+                </div>
+              )}
+
+              <form onSubmit={handleRegister} className="space-y-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-900" htmlFor="name">Full Name</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <User className="h-5 w-5 text-slate-400" />
+                    </div>
+                    <Input 
+                      id="name"
+                      type="text"
+                      placeholder="Jane Doe"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                      className="pl-10 !bg-white border-[#D1D5DB] focus-visible:border-[#2563EB] focus-visible:ring-[4px] focus-visible:ring-[#2563EB]/15 text-slate-900 h-12"
+                      disabled={isLoading || !!success}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-900" htmlFor="email">Email address</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Mail className="h-5 w-5 text-slate-400" />
+                    </div>
+                    <Input 
+                      id="email"
+                      type="email"
+                      placeholder="name@university.edu"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="pl-10 !bg-white border-[#D1D5DB] focus-visible:border-[#2563EB] focus-visible:ring-[4px] focus-visible:ring-[#2563EB]/15 text-slate-900 h-12"
+                      disabled={isLoading || !!success}
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-slate-900" htmlFor="password">Password</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Lock className="h-5 w-5 text-slate-400" />
+                      </div>
+                      <Input 
+                        id="password"
+                        type="password"
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        className="pl-10 !bg-white border-[#D1D5DB] focus-visible:border-[#2563EB] focus-visible:ring-[4px] focus-visible:ring-[#2563EB]/15 text-slate-900 h-12"
+                        disabled={isLoading || !!success}
+                      />
+                    </div>
+                    {/* Password Strength Indicator */}
+                    {password.length > 0 && (
+                      <div className="flex gap-1 mt-2">
+                        {[1, 2, 3, 4].map((level) => (
+                          <div 
+                            key={level} 
+                            className={`h-1.5 w-full rounded-full transition-all duration-300 ${
+                              passwordStrength >= level 
+                                ? (passwordStrength <= 2 ? 'bg-amber-500' : passwordStrength === 3 ? 'bg-blue-500' : 'bg-emerald-500') 
+                                : 'bg-slate-200'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-slate-900" htmlFor="confirmPassword">Confirm Password</label>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <Lock className="h-5 w-5 text-slate-400" />
+                      </div>
+                      <Input 
+                        id="confirmPassword"
+                        type="password"
+                        placeholder="••••••••"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        required
+                        className={`pl-10 !bg-white focus-visible:ring-[4px] text-slate-900 h-12 ${
+                          confirmPassword && password !== confirmPassword 
+                            ? 'border-red-500 focus-visible:border-red-500 focus-visible:ring-red-500/15' 
+                            : 'border-[#D1D5DB] focus-visible:border-[#2563EB] focus-visible:ring-[#2563EB]/15'
+                        }`}
+                        disabled={isLoading || !!success}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <Button 
+                  type="submit" 
+                  className="w-full mt-8 bg-[#2563EB] hover:bg-[#1D4ED8] hover:scale-[1.01] transition-all text-white h-12 rounded-[10px] text-base font-semibold" 
+                  isLoading={isLoading}
+                  disabled={!!success}
+                >
+                  {success ? 'Account Created' : 'Create Account'}
+                </Button>
+              </form>
+            </CardContent>
+            <CardFooter className="flex flex-col space-y-4 pt-6 border-t border-slate-100 mt-2 text-center">
+              <div className="text-sm text-slate-600 w-full">
+                Already have an account?{' '}
+                <Link to="/login" className="text-[#2563EB] hover:text-[#1D4ED8] font-bold">
+                  Sign in here
+                </Link>
+              </div>
+              <div className="text-xs text-slate-500 w-full font-medium">
+                Are you an administrator?{' '}
+                <Link to="/register-institution" className="text-[#2563EB] hover:underline">
+                  Onboard your school
+                </Link>
+              </div>
+            </CardFooter>
+          </Card>
         </div>
+        
+        <footer className="mt-8 text-center text-xs text-slate-500 w-full px-4 font-medium">
+          By continuing, you agree to our Terms of Service and Privacy Policy.
+        </footer>
+      </div>
 
-        {/* Right Side - Register Form */}
-        <div style={{ 
-          flex: '1', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center', 
-          padding: '4rem',
-          background: 'rgba(10,12,16,0.5)'
-        }}>
-          <div style={{ width: '100%', maxWidth: '420px' }}>
-            
-            <div style={{ marginBottom: '3rem' }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', background: 'rgba(0,229,255,0.1)', color: '#00e5ff', borderRadius: '100px', fontSize: '0.85rem', fontWeight: '600', marginBottom: '1.5rem' }}>
-                <Sparkles size={16} /> Get Started
+      {/* Right Side: Hero Section */}
+      <div className="w-full lg:w-1/2 relative bg-slate-900 overflow-hidden flex items-center justify-center min-h-[40vh] lg:min-h-screen order-1 lg:order-2">
+        <img 
+          src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2000&auto=format&fit=crop" 
+          alt="Students learning" 
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.55))' }} />
+        
+        <div className="z-20 w-full max-w-xl p-8 lg:p-12 text-left animate-in fade-in duration-1000 delay-150">
+          <div className="hidden lg:flex h-16 w-16 bg-[#2563EB] rounded-2xl items-center justify-center mb-8 shadow-lg">
+            <Compass className="h-8 w-8 text-white" />
+          </div>
+          <h2 className="text-[36px] lg:text-[52px] font-bold text-white mb-6 leading-tight">
+            Expand Your Horizons
+          </h2>
+          <p className="text-slate-200 text-lg lg:text-xl leading-relaxed max-w-md font-medium mb-10">
+            Gain access to world-class courses, expert instructors, and a community of eager learners.
+          </p>
+
+          <div className="hidden lg:flex flex-col space-y-6">
+            <div className="flex items-center gap-4 text-white">
+              <div className="bg-white/10 p-3 rounded-lg backdrop-blur-sm">
+                <Globe2 className="h-6 w-6 text-blue-300" />
               </div>
-              <h2 style={{ fontSize: '2.5rem', fontWeight: '700', marginBottom: '0.5rem', letterSpacing: '-0.5px' }}>Register.</h2>
-              <p style={{ color: 'var(--text-muted)', fontSize: '1rem' }}>Enter your details to create your account.</p>
+              <div>
+                <h4 className="font-semibold text-lg">Global Platform</h4>
+                <p className="text-slate-300 text-sm">Join millions of learners worldwide</p>
+              </div>
             </div>
-            
-            {error && (
-              <div className="animate-slide-in-right" style={{ 
-                background: 'rgba(239, 68, 68, 0.1)', 
-                borderLeft: '4px solid #ef4444', 
-                color: '#fca5a5', 
-                padding: '1rem', 
-                borderRadius: '0 8px 8px 0', 
-                marginBottom: '2rem', 
-                fontSize: '0.9rem',
-                display: 'flex', alignItems: 'center', gap: '0.75rem'
-              }}>
-                {error}
+            <div className="flex items-center gap-4 text-white">
+              <div className="bg-white/10 p-3 rounded-lg backdrop-blur-sm">
+                <ShieldCheck className="h-6 w-6 text-blue-300" />
               </div>
-            )}
-            
-            {success && (
-              <div className="animate-slide-in-right" style={{ 
-                background: 'rgba(16, 185, 129, 0.1)', 
-                borderLeft: '4px solid #10b981', 
-                color: '#6ee7b7', 
-                padding: '1rem', 
-                borderRadius: '0 8px 8px 0', 
-                marginBottom: '2rem', 
-                fontSize: '0.9rem',
-                display: 'flex', alignItems: 'center', gap: '0.75rem'
-              }}>
-                {success}
+              <div>
+                <h4 className="font-semibold text-lg">Secure & Private</h4>
+                <p className="text-slate-300 text-sm">Enterprise-grade security standards</p>
               </div>
-            )}
-
-            <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              
-              <div style={{ position: 'relative' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '500', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Full Name</label>
-                <div style={{ position: 'relative' }}>
-                  <User size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="John Doe"
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '1rem 1rem 1rem 3rem',
-                      background: 'rgba(255,255,255,0.03)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '12px',
-                      color: '#fff',
-                      fontSize: '1rem',
-                      transition: 'all 0.3s ease'
-                    }}
-                  />
-                </div>
+            </div>
+            <div className="flex items-center gap-4 text-white">
+              <div className="bg-white/10 p-3 rounded-lg backdrop-blur-sm">
+                <Users className="h-6 w-6 text-blue-300" />
               </div>
-
-              <div style={{ position: 'relative' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '500', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Email Address</label>
-                <div style={{ position: 'relative' }}>
-                  <Mail size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="name@company.com"
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '1rem 1rem 1rem 3rem',
-                      background: 'rgba(255,255,255,0.03)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '12px',
-                      color: '#fff',
-                      fontSize: '1rem',
-                      transition: 'all 0.3s ease'
-                    }}
-                  />
-                </div>
+              <div>
+                <h4 className="font-semibold text-lg">Expert Community</h4>
+                <p className="text-slate-300 text-sm">Learn directly from industry leaders</p>
               </div>
-              
-              <div style={{ position: 'relative' }}>
-                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '500', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Password</label>
-                <div style={{ position: 'relative' }}>
-                  <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    required
-                    style={{
-                      width: '100%',
-                      padding: '1rem 1rem 1rem 3rem',
-                      background: 'rgba(255,255,255,0.03)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '12px',
-                      color: '#fff',
-                      fontSize: '1rem',
-                      transition: 'all 0.3s ease'
-                    }}
-                  />
-                </div>
-                <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                  Min 8 chars, 1 uppercase, 1 number, 1 special char
-                </div>
-              </div>
-
-              <button type="submit" disabled={isLoading || success !== ''} style={{
-                width: '100%',
-                padding: '1rem',
-                background: 'linear-gradient(135deg, var(--primary), #0088ff)',
-                color: '#000',
-                border: 'none',
-                borderRadius: '12px',
-                fontSize: '1rem',
-                fontWeight: '600',
-                marginTop: '1rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.5rem',
-                boxShadow: '0 10px 25px -5px rgba(0,229,255,0.4)',
-                transition: 'all 0.3s ease',
-                opacity: (isLoading || success !== '') ? 0.7 : 1
-              }}>
-                {isLoading ? 'Creating Account...' : 'Create Account'} 
-                {!isLoading && <ArrowRight size={18} />}
-              </button>
-
-              <p style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                Already have an account? <Link to="/login" style={{ color: '#fff', fontWeight: '500', textDecoration: 'none', borderBottom: '1px solid var(--primary)' }}>Log in</Link>
-              </p>
-              
-            </form>
+            </div>
           </div>
         </div>
       </div>

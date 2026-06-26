@@ -1,201 +1,215 @@
 import { useState, useEffect } from 'react';
-import { 
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
-  BarChart, Bar
-} from 'recharts';
-import { userService, tenantService, courseService } from '../../services/api';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import { TrendingUp, Users, BookOpen, DollarSign, BrainCircuit, Activity, Loader2 } from 'lucide-react';
+import { analyticsService } from '../../services/api';
+import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
 
 const AdminDashboard = () => {
-  const [stats, setStats] = useState({
-    totalUsers: 0,
-    activeCourses: 0,
-    totalTenants: 0
-  });
+  const [data, setData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Mock data for charts
-  const enrollmentData = [
-    { name: 'Jan', enrollments: 400 },
-    { name: 'Feb', enrollments: 300 },
-    { name: 'Mar', enrollments: 550 },
-    { name: 'Apr', enrollments: 480 },
-    { name: 'May', enrollments: 700 },
-    { name: 'Jun', enrollments: 950 },
-  ];
-
-  const revenueData = [
-    { name: 'Web Dev', revenue: 4000 },
-    { name: 'Design', revenue: 3000 },
-    { name: 'Data Sci', revenue: 2000 },
-    { name: 'Marketing', revenue: 2780 },
-    { name: 'Business', revenue: 1890 },
-  ];
-
-  const recentEnrollments = [
-    { id: 1, user: 'Kondwani Phiri', course: 'Advanced React Patterns', date: '2026-06-04', status: 'PAID', amount: '$149.99' },
-    { id: 2, user: 'Chanda Mwale', course: 'Mastering Figma UI/UX', date: '2026-06-03', status: 'PAID', amount: '$199.99' },
-    { id: 3, user: 'Lumpa Mulenga', course: 'Intro to Python', date: '2026-06-02', status: 'PENDING', amount: '$89.99' },
-    { id: 4, user: 'Mwansa Bwalya', course: 'Advanced React Patterns', date: '2026-06-01', status: 'PAID', amount: '$149.99' },
-  ];
-
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const [usersRes, tenantsRes, coursesRes] = await Promise.all([
-          userService.getAllUsers().catch(() => ({ data: { data: Array(124).fill({}) } })),
-          tenantService.getTenantProfile().catch(() => ({ data: { data: {} } })),
-          courseService.getAllCourses().catch(() => ({ data: { data: Array(18).fill({}) } }))
-        ]);
-
-        const uCount = usersRes?.data?.data?.length || 124;
-        const cCount = coursesRes?.data?.data?.length || 18;
-        
-        setStats({
-          totalUsers: uCount,
-          activeCourses: cCount,
-          totalTenants: 1 // Single tenant instance
-        });
-      } catch (err) {
-        console.error('Error fetching dashboard stats', err);
-        setStats({ totalUsers: 124, activeCourses: 18, totalTenants: 1 });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchStats();
+    fetchAnalytics();
   }, []);
 
-  if (isLoading) {
-    return <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--primary)' }}>Loading Analytics...</div>;
-  }
-
-  // Custom Tooltip for Recharts
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div style={{ background: 'rgba(11, 12, 16, 0.9)', border: '1px solid var(--border-color)', padding: '1rem', borderRadius: '8px', boxShadow: '0 10px 25px rgba(0,0,0,0.5)' }}>
-          <p style={{ margin: '0 0 0.5rem 0', color: 'var(--text-muted)' }}>{label}</p>
-          <p style={{ margin: 0, color: '#fff', fontWeight: 'bold' }}>
-            {payload[0].value} {payload[0].dataKey === 'revenue' ? 'USD' : 'Students'}
-          </p>
-        </div>
-      );
+  const fetchAnalytics = async () => {
+    try {
+      const res = await analyticsService.getAdminDashboard();
+      setData(res.data);
+    } catch (error) {
+      console.error('Failed to fetch admin analytics', error);
+    } finally {
+      setIsLoading(false);
     }
-    return null;
   };
 
+  if (isLoading) {
+    return (
+      <div className="flex h-[80vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-[#2563EB]" />
+      </div>
+    );
+  }
+
+  if (!data) return null;
+
+  const { kpis, revenueChart, enrollmentChart } = data;
+
   return (
-    <div style={{ paddingBottom: '4rem' }}>
-      <div style={{ marginBottom: '2.5rem' }}>
-        <h1 style={{ fontSize: '2.5rem', margin: '0 0 0.5rem 0' }}>Dashboard Overview</h1>
-        <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '1.1rem' }}>Welcome back. Here is what is happening with your platform today.</p>
+    <div className="space-y-8">
+      <div className="flex justify-between items-start">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <BrainCircuit className="h-5 w-5 text-[#2563EB]" />
+            <span className="text-[#2563EB] font-bold text-sm tracking-widest uppercase">Admin Intelligence</span>
+          </div>
+          <h1 className="text-3xl font-bold text-[#111827] tracking-tight">Platform Overview</h1>
+          <p className="text-[#4B5563] mt-1">Global metrics and analytics for your tenant.</p>
+        </div>
       </div>
 
       {/* KPI Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginBottom: '2.5rem' }}>
-        {[
-          { label: 'Total Students', value: stats.totalUsers, trend: '+12.5%', color: 'var(--primary)' },
-          { label: 'Active Courses', value: stats.activeCourses, trend: '+4.2%', color: 'var(--secondary)' },
-          { label: 'Monthly Revenue', value: '$12,450', trend: '+18.1%', color: '#10b981' }
-        ].map((kpi, idx) => (
-          <div key={idx} className="glass-panel" style={{ padding: '2rem', position: 'relative', overflow: 'hidden' }}>
-            <div style={{ position: 'relative', zIndex: 1 }}>
-              <h3 style={{ color: 'var(--text-muted)', margin: '0 0 0.5rem 0', fontSize: '1rem', fontWeight: '500' }}>{kpi.label}</h3>
-              <div style={{ fontSize: '2.5rem', fontWeight: '700', color: '#fff', marginBottom: '0.5rem' }}>{kpi.value}</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', fontWeight: '600', color: kpi.color }}>
-                <span>↑</span> {kpi.trend} from last month
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="border-0 bg-[#FFFFFF] shadow-[0_4px_12px_rgba(0,0,0,0.08)] rounded-[16px] relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <CardContent className="p-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm font-semibold text-[#4B5563]">Platform Revenue</p>
+                <h3 className="text-[36px] font-bold text-[#111827] mt-1 leading-none">${kpis.totalRevenue?.toLocaleString() || '0'}</h3>
+              </div>
+              <div className="h-12 w-12 rounded-xl bg-blue-50 flex items-center justify-center text-[#2563EB] shadow-sm">
+                <DollarSign className="h-6 w-6" />
               </div>
             </div>
-            {/* Abstract Background Decoration */}
-            <div style={{ position: 'absolute', right: '-10%', bottom: '-20%', width: '150px', height: '150px', background: kpi.color, filter: 'blur(60px)', opacity: 0.15, borderRadius: '50%', zIndex: 0 }}></div>
-          </div>
-        ))}
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 bg-[#FFFFFF] shadow-[0_4px_12px_rgba(0,0,0,0.08)] rounded-[16px] relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <CardContent className="p-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm font-semibold text-[#4B5563]">Total Students</p>
+                <h3 className="text-[36px] font-bold text-[#111827] mt-1 leading-none">{kpis.totalStudents?.toLocaleString() || '0'}</h3>
+              </div>
+              <div className="h-12 w-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 shadow-sm">
+                <Users className="h-6 w-6" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 bg-[#FFFFFF] shadow-[0_4px_12px_rgba(0,0,0,0.08)] rounded-[16px] relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-[#2563EB]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <CardContent className="p-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm font-semibold text-[#4B5563]">Total Enrollments</p>
+                <h3 className="text-[36px] font-bold text-[#111827] mt-1 leading-none">{kpis.totalEnrollments?.toLocaleString() || '0'}</h3>
+              </div>
+              <div className="h-12 w-12 rounded-xl bg-blue-50 flex items-center justify-center text-[#2563EB] shadow-sm">
+                <TrendingUp className="h-6 w-6" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 bg-[#FFFFFF] shadow-[0_4px_12px_rgba(0,0,0,0.08)] rounded-[16px] relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <CardContent className="p-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm font-semibold text-[#4B5563]">Active Courses</p>
+                <h3 className="text-[36px] font-bold text-[#111827] mt-1 leading-none">{kpis.totalCourses || '0'}</h3>
+              </div>
+              <div className="h-12 w-12 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600 shadow-sm">
+                <BookOpen className="h-6 w-6" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Charts Section */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem', marginBottom: '2.5rem' }}>
-        
-        {/* Enrollments Area Chart */}
-        <div className="glass-panel" style={{ padding: '2rem' }}>
-          <h3 style={{ margin: '0 0 1.5rem 0', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1rem' }}>Student Enrollments</h3>
-          <div style={{ width: '100%', height: '300px' }}>
-            <ResponsiveContainer>
-              <AreaChart data={enrollmentData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorEnrollments" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.4}/>
-                    <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                <XAxis dataKey="name" stroke="var(--text-muted)" tick={{fill: 'var(--text-muted)'}} axisLine={false} tickLine={false} />
-                <YAxis stroke="var(--text-muted)" tick={{fill: 'var(--text-muted)'}} axisLine={false} tickLine={false} />
-                <RechartsTooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="enrollments" stroke="var(--primary)" strokeWidth={3} fillOpacity={1} fill="url(#colorEnrollments)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Revenue Chart */}
+        <Card className="border-0 bg-[#FFFFFF] shadow-[0_4px_12px_rgba(0,0,0,0.08)] rounded-[16px] overflow-hidden">
+          <CardHeader className="border-b border-slate-100 pb-4">
+            <CardTitle className="text-lg font-bold text-[#111827]">Revenue (Last 6 Months)</CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            {revenueChart?.length > 0 ? (
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={revenueChart} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#2563EB" stopOpacity={0.15}/>
+                        <stop offset="95%" stopColor="#2563EB" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
+                    <XAxis dataKey="month" stroke="#94A3B8" fontSize={12} tickLine={false} axisLine={false} />
+                    <YAxis stroke="#94A3B8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(val) => `$${val}`} />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
+                      itemStyle={{ color: '#111827', fontWeight: '600' }}
+                      formatter={(val) => [`$${val}`, 'Revenue']}
+                    />
+                    <Area type="monotone" dataKey="revenue" stroke="#2563EB" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-[300px] flex flex-col items-center justify-center text-center px-4">
+                <div className="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                  <Activity className="h-8 w-8 text-slate-300" />
+                </div>
+                <h4 className="text-base font-semibold text-[#111827] mb-1">No revenue data available yet</h4>
+                <p className="text-sm text-[#4B5563] max-w-[250px]">Create your first paid course and enroll students to generate analytics.</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-        {/* Revenue by Category Bar Chart */}
-        <div className="glass-panel" style={{ padding: '2rem' }}>
-          <h3 style={{ margin: '0 0 1.5rem 0', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1rem' }}>Revenue by Category</h3>
-          <div style={{ width: '100%', height: '300px' }}>
-            <ResponsiveContainer>
-              <BarChart data={revenueData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={false} />
-                <XAxis type="number" stroke="var(--text-muted)" tick={{fill: 'var(--text-muted)'}} axisLine={false} tickLine={false} />
-                <YAxis dataKey="name" type="category" stroke="var(--text-muted)" tick={{fill: 'var(--text-muted)'}} axisLine={false} tickLine={false} />
-                <RechartsTooltip content={<CustomTooltip />} />
-                <Bar dataKey="revenue" fill="var(--secondary)" radius={[0, 4, 4, 0]} barSize={20} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
+        {/* Enrollments Chart */}
+        <Card className="border-0 bg-[#FFFFFF] shadow-[0_4px_12px_rgba(0,0,0,0.08)] rounded-[16px] overflow-hidden">
+          <CardHeader className="border-b border-slate-100 pb-4">
+            <CardTitle className="text-lg font-bold text-[#111827]">Enrollments (Last 30 Days)</CardTitle>
+          </CardHeader>
+          <CardContent className="p-6">
+            {enrollmentChart?.length > 0 ? (
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={enrollmentChart} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorCount" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#2563EB" stopOpacity={0.15}/>
+                        <stop offset="95%" stopColor="#2563EB" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
+                    <XAxis 
+                      dataKey="date" 
+                      stroke="#94A3B8" 
+                      fontSize={12} 
+                      tickLine={false} 
+                      axisLine={false}
+                      tickFormatter={(val) => new Date(val).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
+                    />
+                    <YAxis stroke="#94A3B8" fontSize={12} tickLine={false} axisLine={false} />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#FFFFFF', border: '1px solid #E2E8F0', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
+                      itemStyle={{ color: '#111827', fontWeight: '600' }}
+                      labelFormatter={(val) => new Date(val).toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' })}
+                    />
+                    <Area type="monotone" dataKey="count" stroke="#2563EB" strokeWidth={3} fillOpacity={1} fill="url(#colorCount)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-[300px] flex flex-col items-center justify-center text-center px-4">
+                <div className="h-16 w-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                  <Users className="h-8 w-8 text-slate-300" />
+                </div>
+                <h4 className="text-base font-semibold text-[#111827] mb-1">No enrollment data available yet</h4>
+                <p className="text-sm text-[#4B5563] max-w-[250px]">Invite students or publish courses to see enrollment activity here.</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Recent Enrollments Table */}
-      <div className="glass-panel" style={{ padding: '2rem', overflowX: 'auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '1rem' }}>
-          <h3 style={{ margin: 0 }}>Recent Enrollments</h3>
-          <button style={{ background: 'transparent', border: 'none', color: 'var(--primary)', cursor: 'pointer', fontWeight: 'bold' }}>View All &rarr;</button>
+      {/* Actionable AI Insights Feed Placeholder */}
+      <section className="mt-8 border-l-4 border-l-[#2563EB] pl-6 py-2">
+        <h3 className="text-lg font-bold text-[#111827] flex items-center gap-2 mb-3">
+          <Activity className="h-5 w-5 text-[#2563EB]" />
+          Smart Insights
+        </h3>
+        <div className="bg-[#FFFFFF] shadow-[0_4px_12px_rgba(0,0,0,0.04)] rounded-[12px] p-6 text-[#4B5563] italic border border-[#E5E7EB]">
+          Ntanda AI needs more data to generate insights. Check back once courses are active!
         </div>
-        
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead>
-            <tr style={{ color: 'var(--text-muted)' }}>
-              <th style={{ padding: '1rem', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px' }}>Student</th>
-              <th style={{ padding: '1rem', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px' }}>Course</th>
-              <th style={{ padding: '1rem', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px' }}>Date</th>
-              <th style={{ padding: '1rem', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px' }}>Amount</th>
-              <th style={{ padding: '1rem', fontWeight: '600', textTransform: 'uppercase', fontSize: '0.75rem', letterSpacing: '1px', textAlign: 'right' }}>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {recentEnrollments.map((enr) => (
-              <tr key={enr.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                <td style={{ padding: '1.25rem 1rem', fontWeight: '600', color: '#fff' }}>{enr.user}</td>
-                <td style={{ padding: '1.25rem 1rem', color: 'var(--text-muted)' }}>{enr.course}</td>
-                <td style={{ padding: '1.25rem 1rem', color: 'var(--text-muted)' }}>{new Date(enr.date).toLocaleDateString()}</td>
-                <td style={{ padding: '1.25rem 1rem', fontWeight: '600' }}>{enr.amount}</td>
-                <td style={{ padding: '1.25rem 1rem', textAlign: 'right' }}>
-                  <span style={{ 
-                    background: enr.status === 'PAID' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)', 
-                    color: enr.status === 'PAID' ? '#10b981' : '#f59e0b', 
-                    border: `1px solid ${enr.status === 'PAID' ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`,
-                    padding: '0.35rem 0.75rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 'bold' 
-                  }}>
-                    {enr.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
+      </section>
     </div>
   );
 };

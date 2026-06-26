@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { aiService } from '../../services/api';
 
 const AdminAIStudio = () => {
@@ -38,55 +38,64 @@ const AdminAIStudio = () => {
   };
 
   return (
-    <div style={{ paddingBottom: '4rem', maxWidth: '1000px', position: 'relative' }}>
-      <div style={{ marginBottom: '2.5rem' }}>
-        <h1 style={{ fontSize: '2.5rem', margin: '0 0 0.5rem 0', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <span style={{ 
-            background: 'linear-gradient(45deg, #00e5ff, #b200ff)', 
-            WebkitBackgroundClip: 'text', 
-            WebkitTextFillColor: 'transparent',
-            filter: 'drop-shadow(0 0 8px rgba(0,229,255,0.3))'
-          }}>AI Studio</span>
-          ✨
-        </h1>
-        <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '1.1rem' }}>Automatically generate course content and assessments using the internal AI Engine.</p>
-      </div>
+    <div className="flex-1 max-w-max-width mx-auto w-full p-md md:p-margin-desktop space-y-3xl font-body-md bg-surface-bright">
+      {/* Header */}
+      <section className="flex flex-col md:flex-row md:items-end justify-between gap-lg">
+        <div>
+          <nav className="flex items-center gap-2 text-label-sm text-on-surface-variant mb-base">
+            <span>Engagement & Utilities</span>
+            <span className="material-symbols-outlined text-[12px]" style={{fontVariationSettings: "'FILL' 0"}}>chevron_right</span>
+            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-bold">AI Studio</span>
+          </nav>
+          <h2 className="font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface flex items-center gap-sm">
+            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">AI Studio</span>
+            <span className="material-symbols-outlined text-purple-600" style={{fontVariationSettings: "'FILL' 1"}}>auto_awesome</span>
+          </h2>
+          <p className="text-body-lg text-on-surface-variant mt-xs">Automatically generate course content and assessments using the internal AI Engine.</p>
+        </div>
+      </section>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-xl">
         
         {/* Left Column: Form */}
-        <div className="glass-panel animate-fade-up" style={{ padding: '2.5rem', border: '1px solid rgba(0,229,255,0.2)', boxShadow: '0 8px 32px rgba(0,229,255,0.05)' }}>
-          <h3 style={{ margin: '0 0 1.5rem 0', color: '#fff' }}>Quiz Generator</h3>
-          <form onSubmit={handleGenerate}>
-            <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Topic</label>
+        <div className="bg-surface-container-lowest border border-purple-500/20 shadow-[0_8px_32px_rgba(168,85,247,0.05)] rounded-2xl p-xl flex flex-col">
+          <div className="flex items-center gap-sm mb-xl">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center text-purple-600">
+              <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 0"}}>quiz</span>
+            </div>
+            <h3 className="font-headline-sm text-on-surface font-bold">Quiz Generator</h3>
+          </div>
+
+          <form onSubmit={handleGenerate} className="space-y-lg flex-1 flex flex-col">
+            <div>
+              <label className="text-label-md text-on-surface font-semibold mb-xs block">Topic / Knowledge Area</label>
               <input 
                 type="text" 
                 value={form.topic} 
                 onChange={e => setForm({...form, topic: e.target.value})}
                 required 
                 placeholder="e.g. React Hooks Architecture"
-                style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'rgba(0,0,0,0.3)', color: '#fff' }} 
+                className="w-full border border-outline-variant rounded-lg focus:ring-purple-500 focus:border-purple-500 px-md py-sm bg-white transition-shadow" 
               />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>
+            <div className="grid grid-cols-2 gap-md">
               <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Number of Questions</label>
+                <label className="text-label-md text-on-surface font-semibold mb-xs block">Question Count</label>
                 <input 
                   type="number" 
                   value={form.questionCount} 
                   onChange={e => setForm({...form, questionCount: parseInt(e.target.value)})}
                   required min="1" max="20"
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'rgba(0,0,0,0.3)', color: '#fff' }} 
+                  className="w-full border border-outline-variant rounded-lg focus:ring-purple-500 focus:border-purple-500 px-md py-sm bg-white" 
                 />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Difficulty</label>
+                <label className="text-label-md text-on-surface font-semibold mb-xs block">Difficulty</label>
                 <select 
                   value={form.difficulty} 
                   onChange={e => setForm({...form, difficulty: e.target.value})}
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'rgba(0,0,0,0.3)', color: '#fff' }} 
+                  className="w-full border border-outline-variant rounded-lg focus:ring-purple-500 focus:border-purple-500 px-md py-sm bg-white" 
                 >
                   <option value="EASY">Easy</option>
                   <option value="MEDIUM">Medium</option>
@@ -95,68 +104,75 @@ const AdminAIStudio = () => {
               </div>
             </div>
 
-            <button 
-              type="submit" 
-              className="btn btn-primary" 
-              disabled={isGenerating}
-              style={{ 
-                width: '100%', 
-                background: 'linear-gradient(45deg, #00e5ff, #b200ff)', 
-                border: 'none',
-                boxShadow: '0 0 15px rgba(0,229,255,0.4)',
-                opacity: isGenerating ? 0.7 : 1,
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: '0.5rem'
-              }}
-            >
-              {isGenerating ? (
-                <>
-                  <span className="spinner" style={{ width: '16px', height: '16px', border: '2px solid #fff', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></span>
-                  Generating...
-                </>
-              ) : 'Generate Quiz'}
-            </button>
+            <div className="mt-auto pt-lg">
+              <button 
+                type="submit" 
+                disabled={isGenerating}
+                className={`w-full py-4 rounded-xl font-bold text-white shadow-lg flex items-center justify-center gap-2 transition-all ${isGenerating ? 'opacity-70 cursor-not-allowed bg-surface-container-high text-on-surface-variant shadow-none' : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:shadow-purple-500/25 hover:-translate-y-0.5'}`}
+              >
+                {isGenerating ? (
+                  <>
+                    <span className="material-symbols-outlined animate-spin" style={{fontVariationSettings: "'FILL' 0"}}>progress_activity</span>
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 1"}}>auto_awesome</span>
+                    Generate Content
+                  </>
+                )}
+              </button>
+            </div>
           </form>
         </div>
 
         {/* Right Column: Output */}
-        <div className="glass-panel animate-fade-up" style={{ padding: '2.5rem', display: 'flex', flexDirection: 'column', minHeight: '400px' }}>
-          <h3 style={{ margin: '0 0 1.5rem 0', color: '#fff' }}>Output</h3>
+        <div className="bg-white border border-outline-variant shadow-sm rounded-2xl p-xl flex flex-col min-h-[500px]">
+          <h3 className="font-headline-sm text-on-surface font-bold mb-xl">Engine Output</h3>
           
           {!isGenerating && !generatedQuiz && (
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', textAlign: 'center', flexDirection: 'column', gap: '1rem' }}>
-              <span style={{ fontSize: '3rem', opacity: 0.2 }}>🤖</span>
-              Wait for AI Engine to generate content.
+            <div className="flex-1 flex flex-col items-center justify-center text-center space-y-md text-on-surface-variant">
+              <div className="w-24 h-24 rounded-full bg-surface-container-low flex items-center justify-center text-4xl opacity-50">
+                🤖
+              </div>
+              <div>
+                <p className="font-label-lg font-bold">Awaiting Instructions</p>
+                <p className="text-body-sm max-w-xs mt-1">Configure the parameters on the left and start the AI engine to generate course content.</p>
+              </div>
             </div>
           )}
 
           {isGenerating && (
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '1.5rem' }}>
-              <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'linear-gradient(45deg, #00e5ff, #b200ff)', animation: 'pulse 1.5s infinite', boxShadow: '0 0 20px #00e5ff' }}></div>
-              <p style={{ color: 'var(--primary)', fontWeight: '500', animation: 'pulse 1.5s infinite' }}>Engine is processing...</p>
+            <div className="flex-1 flex flex-col items-center justify-center space-y-lg animate-pulse">
+              <div className="relative w-20 h-20">
+                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 animate-spin" style={{ animationDuration: '3s' }}></div>
+                <div className="absolute inset-1 rounded-full bg-white flex items-center justify-center text-2xl">✨</div>
+              </div>
+              <p className="font-label-lg text-purple-600 font-bold tracking-widest uppercase">Synthesizing...</p>
             </div>
           )}
 
           {generatedQuiz && !isGenerating && (
-            <div style={{ flex: 1, overflowY: 'auto', paddingRight: '0.5rem' }} className="animate-fade-up">
-              <h4 style={{ color: 'var(--primary)', marginBottom: '1.5rem', fontSize: '1.2rem', borderBottom: '1px solid rgba(0,229,255,0.2)', paddingBottom: '0.5rem' }}>{generatedQuiz.title}</h4>
+            <div className="flex-1 flex flex-col animate-fade-up">
+              <div className="mb-lg pb-md border-b border-outline-variant">
+                <h4 className="font-headline-sm text-purple-700 font-bold">{generatedQuiz.title}</h4>
+                <p className="text-label-sm text-on-surface-variant uppercase tracking-wider mt-1">{form.difficulty} • {generatedQuiz.questions.length} Questions</p>
+              </div>
               
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div className="flex-1 overflow-y-auto pr-sm space-y-lg">
                 {generatedQuiz.questions.map((q, idx) => (
-                  <div key={q.id} style={{ background: 'rgba(0,0,0,0.2)', padding: '1.25rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <p style={{ fontWeight: '600', margin: '0 0 1rem 0' }}>{idx + 1}. {q.text}</p>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <div key={q.id} className="bg-surface-container-lowest border border-outline-variant p-md rounded-xl shadow-sm">
+                    <p className="font-bold text-on-surface mb-md">
+                      <span className="text-purple-600 mr-2">{idx + 1}.</span>
+                      {q.text}
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-sm">
                       {q.options.map(opt => (
-                        <div key={opt} style={{ 
-                          padding: '0.75rem', 
-                          borderRadius: '6px', 
-                          background: opt === q.correctAnswer ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255,255,255,0.03)',
-                          border: opt === q.correctAnswer ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid transparent',
-                          color: opt === q.correctAnswer ? '#10b981' : 'var(--text-muted)',
-                          fontSize: '0.9rem'
-                        }}>
+                        <div key={opt} className={`p-sm rounded-lg border text-body-sm transition-colors ${
+                          opt === q.correctAnswer 
+                            ? 'bg-primary/10 border-primary/30 text-primary font-medium' 
+                            : 'bg-white border-outline-variant text-on-surface-variant'
+                        }`}>
                           {opt}
                         </div>
                       ))}
@@ -165,19 +181,17 @@ const AdminAIStudio = () => {
                 ))}
               </div>
 
-              <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-                <button className="btn btn-outline" style={{ width: '100%', borderColor: 'var(--primary)', color: 'var(--primary)' }}>Save to Course Bank</button>
+              <div className="mt-xl pt-lg border-t border-outline-variant shrink-0">
+                <button className="w-full py-3 border-2 border-purple-600 text-purple-700 font-bold rounded-xl hover:bg-purple-50 transition-colors flex items-center justify-center gap-2">
+                  <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 0"}}>save</span>
+                  Save to Assessment Bank
+                </button>
               </div>
             </div>
           )}
 
         </div>
       </div>
-      
-      <style>{`
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.95); } }
-      `}</style>
     </div>
   );
 };

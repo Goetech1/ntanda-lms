@@ -30,60 +30,64 @@ const InstructorDashboard = () => {
     fetchData();
   }, []);
 
-  if (isLoading) return <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--primary)' }}>Loading Dashboard...</div>;
+  if (isLoading) return <div className="p-xl text-center text-primary font-bold">Loading Dashboard...</div>;
 
   return (
-    <div style={{ maxWidth: '1200px', position: 'relative' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '2.5rem' }}>
+    <div className="max-w-max-width mx-auto relative animate-fade-up">
+      {/* Welcome Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-md mb-xl">
         <div>
-          <h1 style={{ fontSize: '2.5rem', margin: '0 0 0.5rem 0' }}>Welcome back, Tom</h1>
-          <p style={{ color: 'var(--text-muted)', margin: 0, fontSize: '1.1rem' }}>Here is what's happening with your courses today.</p>
+          <h1 className="font-headline-md text-display-lg-mobile md:text-headline-md text-primary tracking-tight mb-xs">Welcome back, Tom</h1>
+          <p className="text-on-surface-variant text-body-lg">Here is what's happening with your courses today.</p>
         </div>
-        <div style={{ display: 'flex', gap: '1rem' }}>
-          <button className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div className="flex flex-col sm:flex-row gap-sm w-full sm:w-auto">
+          <button className="btn btn-outline flex items-center justify-center gap-xs py-xs">
             <span>📹</span> Schedule Live Class
           </button>
-          <button className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <button className="btn btn-primary flex items-center justify-center gap-xs py-xs">
             <span>✨</span> Create New Course
           </button>
         </div>
       </div>
 
       {/* Metrics Grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-lg mb-xl">
         {[
           { label: 'Total Students', value: overview.totalStudents, icon: '👥' },
           { label: 'Active Courses', value: overview.activeCourses, icon: '📚' },
           { label: 'Average Rating', value: `⭐ ${overview.averageRating}`, icon: '⭐' },
           { label: 'Total Earnings', value: `$${overview.totalEarnings.toFixed(2)}`, icon: '💰' }
         ].map((metric, i) => (
-          <div key={i} className="glass-panel animate-fade-up" style={{ padding: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', animationDelay: `${i * 0.1}s` }}>
-            <div style={{ fontSize: '2.5rem', opacity: 0.8 }}>{metric.icon}</div>
+          <div key={i} className="glass-panel p-md flex items-center gap-md">
+            <div className="text-4xl opacity-80">{metric.icon}</div>
             <div>
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '0.25rem' }}>{metric.label}</div>
-              <div style={{ fontSize: '1.75rem', fontWeight: 'bold', color: '#fff' }}>{metric.value}</div>
+              <div className="text-on-surface-variant text-label-md mb-xs uppercase tracking-wider">{metric.label}</div>
+              <div className="text-headline-md font-bold text-on-surface">{metric.value}</div>
             </div>
           </div>
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem' }}>
-        <div className="glass-panel animate-fade-up" style={{ padding: '2rem' }}>
-          <h3 style={{ margin: '0 0 1.5rem 0' }}>Performance Overview</h3>
-          <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', border: '1px dashed rgba(255,255,255,0.1)', borderRadius: '8px' }}>
+      {/* Charts and Activity Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+        {/* Performance Overview (2/3 width) */}
+        <div className="lg:col-span-2 glass-panel p-lg">
+          <h3 className="font-headline-sm text-headline-sm mb-lg text-on-surface">Performance Overview</h3>
+          <div className="h-[300px] flex items-center justify-center text-on-surface-variant border border-dashed border-outline-variant/30 rounded-lg">
             [ Chart Area Placeholder ]
           </div>
         </div>
 
-        <div className="glass-panel animate-fade-up" style={{ padding: '2rem', animationDelay: '0.2s' }}>
-          <h3 style={{ margin: '0 0 1.5rem 0' }}>Recent Activity</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        {/* Recent Activity (1/3 width) */}
+        <div className="lg:col-span-1 glass-panel p-lg">
+          <h3 className="font-headline-sm text-headline-sm mb-lg text-on-surface">Recent Activity</h3>
+          <div className="flex flex-col gap-md">
             {overview.recentActivity.map(act => (
-              <div key={act.id} style={{ display: 'flex', gap: '1rem' }}>
-                <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: 'var(--primary)', marginTop: '0.35rem' }} />
+              <div key={act.id} className="flex gap-sm items-start">
+                <div className="w-2.5 h-2.5 rounded-full bg-primary mt-1.5 shrink-0" />
                 <div>
-                  <div style={{ color: '#fff', fontSize: '0.95rem' }}>{act.message}</div>
-                  <div style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginTop: '0.25rem' }}>{act.time}</div>
+                  <div className="text-on-surface text-body-md font-medium">{act.message}</div>
+                  <div className="text-on-surface-variant text-body-sm mt-0.5">{act.time}</div>
                 </div>
               </div>
             ))}

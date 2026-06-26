@@ -1,45 +1,42 @@
 import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-  withCredentials: true, // Necessary for HttpOnly cookies (refresh token)
+  baseURL: API_BASE_URL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Store accessToken in memory
 let accessToken = null;
 
 export const setAccessToken = (token) => {
   accessToken = token;
 };
 
-// Helper for tenant resolution (dynamic or env fallback)
 export const getTenantId = () => {
-  // In a real production environment with subdomains, you might resolve the UUID
-  // via an initial API call or inject it. For now, we fallback to the env variable.
-  return import.meta.env.VITE_TENANT_ID;
+  return sessionStorage.getItem('resolvedTenantId') || import.meta.env.VITE_TENANT_ID;
 };
 
-// Interceptor to attach access token to requests
 api.interceptors.request.use(
   (config) => {
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    const tenantId = getTenantId();
+    if (tenantId) {
+      config.headers['x-tenant-id'] = tenantId;
     }
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Interceptor to handle 401 Unauthorized and token refresh
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-
-    // Avoid infinite loops if /refresh itself fails with 401
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
@@ -47,32 +44,23 @@ api.interceptors.response.use(
       originalRequest.url !== '/auth/login'
     ) {
       originalRequest._retry = true;
-
       try {
         const response = await axios.post(
-          `${import.meta.env.VITE_API_URL}/auth/refresh`,
+          `${API_BASE_URL}/auth/refresh`,
           {},
-          { withCredentials: true } // Required to send the HttpOnly cookie
+          { withCredentials: true }
         );
-
-        // The API contract dictates the token is inside data.data.access_token
         const newAccessToken = response.data.data.access_token;
         setAccessToken(newAccessToken);
-
-        // Update the failed request with the new token
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-
-        // Retry the original request
         return api(originalRequest);
       } catch (refreshError) {
-        // If refresh fails, clear auth state and redirect to login
         setAccessToken(null);
         localStorage.removeItem('user');
-        window.location.href = '/login'; // Fallback redirect
+        window.location.href = '/login';
         return Promise.reject(refreshError);
       }
     }
-
     return Promise.reject(error);
   }
 );
@@ -82,17 +70,20 @@ export const authService = {
     api.post('/auth/login', { email, password }, {
       headers: { 'x-tenant-id': getTenantId() }
     }),
-    
-  register: (fullName, email, password) => 
-    api.post('/auth/register', { fullName, email, password }, {
+  register: (fullName, email, password) => {
+    const [firstName, ...rest] = fullName.split(' ');
+    const lastName = rest.join(' ') || '.';
+    return api.post('/auth/register', { firstName, lastName, email, password }, {
       headers: { 'x-tenant-id': getTenantId() }
-    }),
-    
+    });
+  },
   logout: () => 
     api.post('/auth/logout').then(() => { 
       setAccessToken(null); 
       localStorage.removeItem('user');
-    })
+    }),
+  registerInstitution: (data) => 
+    api.post('/auth/register-institution', data)
 };
 
 export const courseService = {
@@ -105,7 +96,6 @@ export const courseService = {
 
 export const enrollmentService = {
   getMyEnrollments: () => api.get('/enrollments/my-enrollments'),
-  // Admin manual enrollment (temporarily used for testing without Stripe)
   manualEnroll: (userId, courseId) => api.post('/enrollments', { userId, courseId })
 };
 
@@ -121,7 +111,11 @@ export const userService = {
 
 export const tenantService = {
   getTenantProfile: () => api.get('/tenant'),
-  updateTenantProfile: (data) => api.patch('/tenant', data)
+  updateTenantProfile: (data) => api.patch('/tenant', data),
+  getAllTenants: () => api.get('/tenants'),
+  createTenant: (data) => api.post('/tenants', data),
+  updateTenant: (id, data) => api.patch(`/tenants/${id}`, data),
+  deleteTenant: (id) => api.delete(`/tenants/${id}`)
 };
 
 export const aiService = {
@@ -154,12 +148,15 @@ export const financialService = {
 };
 
 export const instructorService = {
-  getAll: () => api.get('/instructors')
+  getAll: () => api.get('/instructors'),
+  create: (data) => api.post('/instructors', data)
 };
 
 export const libraryService = {
   getAll: () => api.get('/library'),
-  upload: (data) => api.post('/library/upload', data)
+  upload: (data) => api.post('/library/upload', data, data instanceof FormData ? {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  } : undefined)
 };
 
 export const communicationService = {
@@ -170,12 +167,14 @@ export const communicationService = {
 
 export const certificateService = {
   getAll: () => api.get('/certificates'),
-  issue: (data) => api.post('/certificates/issue', data)
+  issue: (data) => api.post('/certificates/issue', data),
+  validate: (code) => api.get(`/certificates/validate/${code}`)
 };
 
 export const operationsService = {
   batchEnroll: (data) => api.post('/enrollments/batch', data),
-  logAttendance: (data) => api.post('/attendance', data)
+  logAttendance: (data) => api.post('/attendance/batch', data),
+  logBiometric: (data) => api.post('/attendance/biometric', data)
 };
 
 export const studentPortalService = {
@@ -244,6 +243,112 @@ export const courseModuleService = {
 
 export const lessonService = {
   createLesson: (data) => api.post('/lessons', data)
+};
+
+export const questionBankService = {
+  getCategories: () => api.get('/question-categories'),
+  createCategory: (data) => api.post('/question-categories', data),
+  deleteCategory: (id) => api.delete(`/question-categories/${id}`),
+  getQuestions: (categoryId) => api.get('/questions', { params: { category_id: categoryId } }),
+  createQuestion: (data) => api.post('/questions', data),
+  updateQuestion: (id, data) => api.patch(`/questions/${id}`, data),
+  deleteQuestion: (id) => api.delete(`/questions/${id}`)
+};
+
+export const liveSessionService = {
+  getByCourse: (courseId) => api.get('/live-sessions', { params: { course_id: courseId } }),
+  create: (data) => api.post('/live-sessions', data),
+  update: (id, data) => api.patch(`/live-sessions/${id}`, data),
+  delete: (id) => api.delete(`/live-sessions/${id}`)
+};
+
+export const analyticsService = {
+  getAdminDashboard: () => api.get('/analytics/dashboard'),
+  getInstructorDashboard: () => api.get('/analytics/instructor-dashboard'),
+  getCourseAnalytics: (courseId) => api.get(`/analytics/course/${courseId}`)
+};
+
+export const ltiService = {
+  getPlatform: () => api.get('/lti/platform'),
+  savePlatform: (data) => api.post('/lti/platform', data),
+  generateDeepLink: (data) => api.post('/lti/deep-link/generate', data)
+};
+
+export const supportService = {
+  getAdminTickets: () => api.get('/support/admin/tickets'),
+  getStudentTickets: () => api.get('/support/tickets'),
+  getTicket: (id) => api.get(`/support/tickets/${id}`),
+  createTicket: (data) => api.post('/support/tickets', data),
+  replyTicket: (id, data) => api.post(`/support/tickets/${id}/reply`, data),
+  updateStatus: (id, status) => api.patch(`/support/tickets/${id}/status`, { status })
+};
+
+export const announcementService = {
+  getByCourse: (courseId) => api.get(`/courses/${courseId}/announcements`),
+  create: (courseId, data) => api.post(`/courses/${courseId}/announcements`, data)
+};
+
+export const studentNoteService = {
+  getNote: (courseId, lessonId) => api.get(`/courses/${courseId}/lessons/${lessonId}/notes`),
+  saveNote: (courseId, lessonId, noteText) => api.post(`/courses/${courseId}/lessons/${lessonId}/notes`, { note_text: noteText })
+};
+
+export const bulkImportService = {
+  importUsers: (users) => api.post('/admin/users/bulk-import', { users })
+};
+
+export const learningPathService = {
+  getAll: () => api.get('/learning-paths'),
+  getById: (id) => api.get(`/learning-paths/${id}`),
+  create: (data) => api.post('/learning-paths', data)
+};
+
+export const tenantBrandingService = {
+  updateCurrent: (data) => api.put('/tenant/current', data)
+};
+
+export const webhookService = {
+  getAll: () => api.get('/admin/webhooks'),
+  create: (data) => api.post('/admin/webhooks', data),
+  update: (id, data) => api.patch(`/admin/webhooks/${id}`, data),
+  delete: (id) => api.delete(`/admin/webhooks/${id}`)
+};
+
+export const gamificationService = {
+  getLeaderboard: () => api.get('/gamification/leaderboard'),
+  getBadges: () => api.get('/gamification/badges'),
+  createBadge: (data) => api.post('/gamification/badges', data),
+  getMyBadges: () => api.get('/gamification/my-badges')
+};
+
+export const paymentMethodService = {
+  getAll: () => api.get('/payment-methods'),
+  create: (data) => api.post('/payment-methods', data),
+  update: (id, data) => api.patch(`/payment-methods/${id}`, data),
+  delete: (id) => api.delete(`/payment-methods/${id}`)
+};
+
+export const studentPaymentService = {
+  getAll: () => api.get('/student-payments'),
+  getById: (id) => api.get(`/student-payments/${id}`),
+  create: (formData) => api.post('/student-payments', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
+  initiateCollection: (data) => api.post('/student-payments/initiate', data),
+  review: (id, data) => api.patch(`/student-payments/${id}/review`, data)
+};
+
+export const studentAccountService = {
+  getAll: () => api.get('/student-account-transactions')
+};
+
+export const saasSubscriptionService = {
+  getPlans: () => api.get('/subscription-plans'),
+  createPlan: (data) => api.post('/subscription-plans', data),
+  updatePlan: (id, data) => api.patch(`/subscription-plans/${id}`, data),
+  
+  getCurrentSubscription: () => api.get('/institution-subscriptions'),
+  initiatePayment: (data) => api.post('/institution-subscriptions/initiate', data)
 };
 
 export default api;
