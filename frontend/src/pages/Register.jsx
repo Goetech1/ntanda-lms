@@ -1,288 +1,292 @@
-import { useState, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Mail, Lock, Compass, ShieldCheck, Users, Globe2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { User, Mail, Compass, ShieldCheck, Users, Globe2, Building } from 'lucide-react';
 import { authService } from '../services/api';
 import { useTenantBranding } from '../components/TenantBrandingProvider';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/Card';
+import { FormField } from '../components/ui/FormField';
+import { PasswordInput } from '../components/ui/PasswordInput';
+import { SuccessScreen } from '../components/ui/SuccessScreen';
+import { useFormValidation } from '../hooks/useFormValidation';
 
 const Register = () => {
   const { tenant } = useTenantBranding();
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [passwordStrength, setPasswordStrength] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [globalError, setGlobalError] = useState('');
+  
+  const submittingRef = useRef(false);
   const navigate = useNavigate();
 
-  // Password strength calculation
-  useEffect(() => {
-    let score = 0;
-    if (password.length >= 8) score += 1;
-    if (/[A-Z]/.test(password)) score += 1;
-    if (/\d/.test(password)) score += 1;
-    if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score += 1;
-    setPasswordStrength(score);
-  }, [password]);
+  const {
+    values,
+    getFieldError,
+    getFieldProps,
+    validateAll,
+    setServerErrors
+  } = useFormValidation(
+    {
+      name: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
+    },
+    {
+      name: { required: 'Full name is required', minLength: { value: 2, message: 'Name must be at least 2 characters' } },
+      email: { required: 'Email address is required', email: true },
+      password: { required: 'Password is required', minLength: { value: 6, message: 'At least 6 characters' } },
+      confirmPassword: { 
+        required: 'Please confirm your password',
+        match: { field: 'password', message: 'Passwords do not match' }
+      }
+    }
+  );
 
-  const validatePassword = (pass) => {
-    if (pass.length < 8) return 'Password must be at least 8 characters';
-    if (!/[A-Z]/.test(pass)) return 'Password must contain 1 uppercase letter';
-    if (!/\d/.test(pass)) return 'Password must contain 1 number';
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(pass)) return 'Password must contain 1 special character';
-    return null;
-  };
-
-  const handleRegister = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    if (submittingRef.current) return;
+    
+    if (!validateAll()) return;
 
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-
-    const passwordError = validatePassword(password);
-    if (passwordError) {
-      setError(passwordError);
-      return;
-    }
-
-    setIsLoading(true);
+    submittingRef.current = true;
+    setIsSubmitting(true);
+    setGlobalError('');
 
     try {
-      await authService.register(name, email, password);
-      
-      setSuccess('Account created successfully! Redirecting to login...');
+      // The API service splits name into firstName/lastName internally
+      await authService.register(values.name, values.email, values.password);
+      setIsSuccess(true);
+      // Wait for success screen animation to finish, then navigate
       setTimeout(() => {
         navigate('/login');
-      }, 2000);
-      
+      }, 3000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      const response = err.response;
+      if (response?.status === 409) {
+        setGlobalError(response.data?.message || 'An account with this email already exists.');
+      } else if (response?.status === 422) {
+        setServerErrors(response.data.errors);
+      } else {
+        setGlobalError('Registration failed. Please try again.');
+      }
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
+      submittingRef.current = false;
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col lg:flex-row selection:bg-[#2563EB] selection:text-white">
+    <div className="min-h-screen bg-[var(--ob-bg)] flex flex-col lg:flex-row selection:bg-[#2563EB] selection:text-white relative">
+      
+      {/* Decorative background for left side */}
+      <div className="absolute top-0 left-0 w-full lg:w-1/2 h-full overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-50 opacity-40 blur-3xl" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-violet-50 opacity-40 blur-3xl" />
+      </div>
+
       {/* Left Side: Form */}
       <div className="w-full lg:w-1/2 flex flex-col justify-center items-center p-6 md:p-12 relative z-10 min-h-screen lg:min-h-0 order-2 lg:order-1">
-        <div className="w-full max-w-[500px] animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <div className="flex flex-col items-center mb-8">
-            {tenant?.branding?.logoUrl ? (
-              <img src={tenant.branding.logoUrl} alt={tenant.name} className="h-12 w-12 rounded-xl object-cover shadow-sm mb-4" />
-            ) : (
-              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-[#2563EB] to-[#1D4ED8] shadow-sm mb-4 flex items-center justify-center">
-                <span className="text-xl font-bold text-white">{tenant?.name?.charAt(0) || "N"}</span>
-              </div>
-            )}
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900">{tenant?.name || "Ntanda LMS"}</h1>
-          </div>
-
-          <Card className="w-full bg-[#FFFFFF] shadow-[0_12px_32px_rgba(0,0,0,0.08)] rounded-[16px] border-0">
-            <CardHeader className="space-y-2 text-center pb-6">
-              <CardTitle className="text-2xl font-bold text-slate-900">Create an account</CardTitle>
-              <CardDescription className="text-slate-600 text-base">
-                Enter your details to start your learning journey
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {error && (
-                <div className="mb-6 p-4 rounded-lg bg-red-50 text-red-700 border border-red-200 text-sm flex items-center font-medium animate-in shake">
-                  {error}
-                </div>
-              )}
-              {success && (
-                <div className="mb-6 p-4 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-sm flex items-center font-medium animate-in slide-in-from-top-2">
-                  {success}
-                </div>
-              )}
-
-              <form onSubmit={handleRegister} className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-900" htmlFor="name">Full Name</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <User className="h-5 w-5 text-slate-400" />
-                    </div>
-                    <Input 
-                      id="name"
-                      type="text"
-                      placeholder="Jane Doe"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required
-                      className="pl-10 !bg-white border-[#D1D5DB] focus-visible:border-[#2563EB] focus-visible:ring-[4px] focus-visible:ring-[#2563EB]/15 text-slate-900 h-12"
-                      disabled={isLoading || !!success}
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-900" htmlFor="email">Email address</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Mail className="h-5 w-5 text-slate-400" />
-                    </div>
-                    <Input 
-                      id="email"
-                      type="email"
-                      placeholder="name@university.edu"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      className="pl-10 !bg-white border-[#D1D5DB] focus-visible:border-[#2563EB] focus-visible:ring-[4px] focus-visible:ring-[#2563EB]/15 text-slate-900 h-12"
-                      disabled={isLoading || !!success}
-                    />
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-900" htmlFor="password">Password</label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Lock className="h-5 w-5 text-slate-400" />
-                      </div>
-                      <Input 
-                        id="password"
-                        type="password"
-                        placeholder="••••••••"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        className="pl-10 !bg-white border-[#D1D5DB] focus-visible:border-[#2563EB] focus-visible:ring-[4px] focus-visible:ring-[#2563EB]/15 text-slate-900 h-12"
-                        disabled={isLoading || !!success}
-                      />
-                    </div>
-                    {/* Password Strength Indicator */}
-                    {password.length > 0 && (
-                      <div className="flex gap-1 mt-2">
-                        {[1, 2, 3, 4].map((level) => (
-                          <div 
-                            key={level} 
-                            className={`h-1.5 w-full rounded-full transition-all duration-300 ${
-                              passwordStrength >= level 
-                                ? (passwordStrength <= 2 ? 'bg-amber-500' : passwordStrength === 3 ? 'bg-blue-500' : 'bg-emerald-500') 
-                                : 'bg-slate-200'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-900" htmlFor="confirmPassword">Confirm Password</label>
-                    <div className="relative">
-                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <Lock className="h-5 w-5 text-slate-400" />
-                      </div>
-                      <Input 
-                        id="confirmPassword"
-                        type="password"
-                        placeholder="••••••••"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        required
-                        className={`pl-10 !bg-white focus-visible:ring-[4px] text-slate-900 h-12 ${
-                          confirmPassword && password !== confirmPassword 
-                            ? 'border-red-500 focus-visible:border-red-500 focus-visible:ring-red-500/15' 
-                            : 'border-[#D1D5DB] focus-visible:border-[#2563EB] focus-visible:ring-[#2563EB]/15'
-                        }`}
-                        disabled={isLoading || !!success}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <Button 
-                  type="submit" 
-                  className="w-full mt-8 bg-[#2563EB] hover:bg-[#1D4ED8] hover:scale-[1.01] transition-all text-white h-12 rounded-[10px] text-base font-semibold" 
-                  isLoading={isLoading}
-                  disabled={!!success}
-                >
-                  {success ? 'Account Created' : 'Create Account'}
-                </Button>
-              </form>
-            </CardContent>
-            <CardFooter className="flex flex-col space-y-4 pt-6 border-t border-slate-100 mt-2 text-center">
-              <div className="text-sm text-slate-600 w-full">
-                Already have an account?{' '}
-                <Link to="/login" className="text-[#2563EB] hover:text-[#1D4ED8] font-bold">
-                  Sign in here
-                </Link>
-              </div>
-              <div className="text-xs text-slate-500 w-full font-medium">
-                Are you an administrator?{' '}
-                <Link to="/register-institution" className="text-[#2563EB] hover:underline">
-                  Onboard your school
-                </Link>
-              </div>
-            </CardFooter>
-          </Card>
-        </div>
         
-        <footer className="mt-8 text-center text-xs text-slate-500 w-full px-4 font-medium">
-          By continuing, you agree to our Terms of Service and Privacy Policy.
-        </footer>
+        <AnimatePresence mode="wait">
+          {!isSuccess ? (
+            <motion.div 
+              key="form"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.4 }}
+              className="w-full max-w-[440px]"
+            >
+              {/* Header */}
+              <div className="flex flex-col items-center mb-8 text-center">
+                {tenant?.branding?.logoUrl ? (
+                  <img src={tenant.branding.logoUrl} alt={tenant.name} className="h-12 w-12 rounded-xl object-cover shadow-sm mb-4 bg-white p-1 border border-gray-100" />
+                ) : (
+                  <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-[#2563EB] to-[#1D4ED8] shadow-sm mb-4 flex items-center justify-center">
+                    <span className="text-xl font-bold text-white">{tenant?.name?.charAt(0) || "N"}</span>
+                  </div>
+                )}
+                <h1 className="text-3xl font-bold tracking-tight" style={{ color: 'var(--ob-text-primary)' }}>
+                  Create an account
+                </h1>
+                <p className="text-[var(--ob-text-secondary)] mt-2">
+                  Enter your details to start your learning journey
+                </p>
+              </div>
+
+              <div className="bg-white rounded-[var(--ob-radius-lg)] shadow-[var(--ob-shadow-md)] p-8 border border-[var(--ob-border)] relative overflow-hidden">
+                
+                {globalError && (
+                  <div className="mb-6 p-4 rounded-[var(--ob-radius-sm)] border border-[var(--ob-error-border)] bg-[var(--ob-error-light)] text-[var(--ob-error)] text-sm font-medium" role="alert">
+                    {globalError}
+                  </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+                  <FormField label="Full Name" name="name" error={getFieldError('name')} required>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+                        <User className="h-[18px] w-[18px]" style={{ color: 'var(--ob-text-muted)' }} />
+                      </div>
+                      <Input 
+                        id="name"
+                        placeholder="Jane Doe"
+                        autoComplete="name"
+                        {...getFieldProps('name')}
+                        className="pl-10 h-12 border-[#E2E8F0] hover:border-[#CBD5E1] focus-visible:border-[#2563EB]"
+                        disabled={isSubmitting}
+                      />
+                    </div>
+                  </FormField>
+
+                  <FormField label="Email address" name="email" error={getFieldError('email')} required>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+                        <Mail className="h-[18px] w-[18px]" style={{ color: 'var(--ob-text-muted)' }} />
+                      </div>
+                      <Input 
+                        id="email"
+                        type="email"
+                        placeholder="name@university.edu"
+                        autoComplete="email"
+                        {...getFieldProps('email')}
+                        className="pl-10 h-12 border-[#E2E8F0] hover:border-[#CBD5E1] focus-visible:border-[#2563EB]"
+                        disabled={isSubmitting}
+                      />
+                    </div>
+                  </FormField>
+                  
+                  <FormField label="Password" name="password" error={getFieldError('password')} required>
+                    <PasswordInput 
+                      id="password"
+                      placeholder="••••••••"
+                      autoComplete="new-password"
+                      showStrength
+                      error={!!getFieldError('password')}
+                      {...getFieldProps('password')}
+                      disabled={isSubmitting}
+                    />
+                  </FormField>
+
+                  <FormField label="Confirm Password" name="confirmPassword" error={getFieldError('confirmPassword')} required>
+                    <PasswordInput 
+                      id="confirmPassword"
+                      placeholder="••••••••"
+                      autoComplete="new-password"
+                      error={!!getFieldError('confirmPassword')}
+                      {...getFieldProps('confirmPassword')}
+                      disabled={isSubmitting}
+                    />
+                  </FormField>
+
+                  <div className="pt-2">
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-[#2563EB] hover:bg-[#1D4ED8] hover:shadow-md transition-all text-white h-12 rounded-[10px] text-base font-semibold" 
+                      isLoading={isSubmitting}
+                    >
+                      Create Account
+                    </Button>
+                  </div>
+                </form>
+
+                <div className="mt-6 pt-6 border-t border-[var(--ob-border)] text-center space-y-3">
+                  <div className="text-sm text-gray-600">
+                    Already have an account?{' '}
+                    <Link to="/login" className="text-[#2563EB] hover:text-[#1D4ED8] font-semibold transition-colors">
+                      Sign in here
+                    </Link>
+                  </div>
+                  <div className="text-xs text-gray-500 flex justify-center items-center gap-1.5">
+                    <Building className="h-3.5 w-3.5" />
+                    Are you an administrator?{' '}
+                    <Link to="/register-institution" className="text-[#2563EB] hover:underline font-medium">
+                      Onboard your school
+                    </Link>
+                  </div>
+                </div>
+              </div>
+              
+              <footer className="mt-8 text-center text-xs text-gray-400 font-medium max-w-xs mx-auto">
+                By continuing, you agree to our Terms of Service and Privacy Policy.
+              </footer>
+            </motion.div>
+          ) : (
+            <motion.div 
+              key="success"
+              className="w-full max-w-[440px] bg-white rounded-[var(--ob-radius-lg)] shadow-[var(--ob-shadow-md)] border border-[var(--ob-border)] p-8"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <SuccessScreen
+                heading="Account Created!"
+                description="Your account has been successfully created. Redirecting you to login..."
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Right Side: Hero Section */}
-      <div className="w-full lg:w-1/2 relative bg-slate-900 overflow-hidden flex items-center justify-center min-h-[40vh] lg:min-h-screen order-1 lg:order-2">
-        <img 
-          src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=2000&auto=format&fit=crop" 
-          alt="Students learning" 
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(rgba(0,0,0,0.45), rgba(0,0,0,0.55))' }} />
+      <div className="w-full lg:w-1/2 relative bg-[#0B0F19] overflow-hidden flex flex-col justify-center min-h-[40vh] lg:min-h-screen order-1 lg:order-2">
+        {/* Abstract shapes replacing external image */}
+        <div className="absolute inset-0 opacity-20">
+          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1"/>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+          </svg>
+          <div className="absolute top-1/4 right-1/4 w-[400px] h-[400px] bg-blue-500 rounded-full mix-blend-screen filter blur-[100px] opacity-30 animate-pulse" style={{ animationDuration: '8s' }} />
+          <div className="absolute bottom-1/4 left-1/4 w-[300px] h-[300px] bg-purple-500 rounded-full mix-blend-screen filter blur-[80px] opacity-20 animate-pulse" style={{ animationDuration: '10s' }} />
+        </div>
         
-        <div className="z-20 w-full max-w-xl p-8 lg:p-12 text-left animate-in fade-in duration-1000 delay-150">
-          <div className="hidden lg:flex h-16 w-16 bg-[#2563EB] rounded-2xl items-center justify-center mb-8 shadow-lg">
-            <Compass className="h-8 w-8 text-white" />
-          </div>
-          <h2 className="text-[36px] lg:text-[52px] font-bold text-white mb-6 leading-tight">
-            Expand Your Horizons
-          </h2>
-          <p className="text-slate-200 text-lg lg:text-xl leading-relaxed max-w-md font-medium mb-10">
-            Gain access to world-class courses, expert instructors, and a community of eager learners.
-          </p>
+        <div className="z-20 w-full max-w-xl p-8 lg:p-16 text-left">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+          >
+            <div className="hidden lg:flex h-16 w-16 bg-white/10 rounded-2xl items-center justify-center mb-8 backdrop-blur-md border border-white/10">
+              <Compass className="h-8 w-8 text-blue-400" />
+            </div>
+            
+            <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6 leading-[1.15] font-['Outfit']">
+              Expand Your<br/>Horizons
+            </h2>
+            <p className="text-gray-300 text-lg leading-relaxed max-w-md font-medium mb-12">
+              Gain access to world-class courses, expert instructors, and a community of eager learners.
+            </p>
 
-          <div className="hidden lg:flex flex-col space-y-6">
-            <div className="flex items-center gap-4 text-white">
-              <div className="bg-white/10 p-3 rounded-lg backdrop-blur-sm">
-                <Globe2 className="h-6 w-6 text-blue-300" />
-              </div>
-              <div>
-                <h4 className="font-semibold text-lg">Global Platform</h4>
-                <p className="text-slate-300 text-sm">Join millions of learners worldwide</p>
-              </div>
+            <div className="hidden lg:grid grid-cols-1 gap-8">
+              {[
+                { icon: Globe2, title: 'Global Platform', desc: 'Join millions of learners worldwide' },
+                { icon: ShieldCheck, title: 'Secure & Private', desc: 'Enterprise-grade security standards' },
+                { icon: Users, title: 'Expert Community', desc: 'Learn directly from industry leaders' }
+              ].map((feature, i) => (
+                <motion.div 
+                  key={i}
+                  className="flex items-center gap-5 group"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.4 + (i * 0.1) }}
+                >
+                  <div className="bg-white/5 p-3.5 rounded-xl backdrop-blur-sm border border-white/10 group-hover:bg-white/10 transition-colors">
+                    <feature.icon className="h-6 w-6 text-blue-400" />
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-lg text-white mb-0.5">{feature.title}</h4>
+                    <p className="text-gray-400 text-sm">{feature.desc}</p>
+                  </div>
+                </motion.div>
+              ))}
             </div>
-            <div className="flex items-center gap-4 text-white">
-              <div className="bg-white/10 p-3 rounded-lg backdrop-blur-sm">
-                <ShieldCheck className="h-6 w-6 text-blue-300" />
-              </div>
-              <div>
-                <h4 className="font-semibold text-lg">Secure & Private</h4>
-                <p className="text-slate-300 text-sm">Enterprise-grade security standards</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4 text-white">
-              <div className="bg-white/10 p-3 rounded-lg backdrop-blur-sm">
-                <Users className="h-6 w-6 text-blue-300" />
-              </div>
-              <div>
-                <h4 className="font-semibold text-lg">Expert Community</h4>
-                <p className="text-slate-300 text-sm">Learn directly from industry leaders</p>
-              </div>
-            </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>

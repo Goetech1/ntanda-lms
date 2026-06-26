@@ -164,12 +164,48 @@ input, textarea, select {
   transition: all 0.2s ease;
 }
 
-input:focus, textarea:focus, select:focus {
+/* Dark focus style — only for admin/dashboard layouts */
+.admin-layout input:focus,
+.admin-layout textarea:focus,
+.admin-layout select:focus,
+.instructor-layout input:focus,
+.instructor-layout textarea:focus,
+.instructor-layout select:focus {
   outline: none;
   border-color: var(--primary) !important;
   box-shadow: 0 0 0 3px var(--primary-glow) !important;
   background: #111827 !important;
   color: #f9fafb !important;
+}
+
+/* Onboarding Design Tokens */
+:root {
+  --ob-bg: #F8FAFC;
+  --ob-surface: #FFFFFF;
+  --ob-border: #E2E8F0;
+  --ob-border-hover: #CBD5E1;
+  --ob-border-focus: #2563EB;
+  --ob-text-primary: #0F172A;
+  --ob-text-secondary: #475569;
+  --ob-text-muted: #94A3B8;
+  --ob-success: #059669;
+  --ob-success-light: #ECFDF5;
+  --ob-success-border: #A7F3D0;
+  --ob-error: #DC2626;
+  --ob-error-light: #FEF2F2;
+  --ob-error-border: #FECACA;
+  --ob-warning: #D97706;
+  --ob-warning-light: #FFFBEB;
+  --ob-radius-sm: 8px;
+  --ob-radius-md: 12px;
+  --ob-radius-lg: 16px;
+  --ob-radius-xl: 20px;
+  --ob-shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
+  --ob-shadow-sm: 0 2px 8px rgba(0,0,0,0.06);
+  --ob-shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+  --ob-shadow-lg: 0 12px 40px rgba(0,0,0,0.1);
+  --ob-shadow-xl: 0 20px 60px rgba(0,0,0,0.12);
+  --ob-focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 /* Table Hover Enhancements */
