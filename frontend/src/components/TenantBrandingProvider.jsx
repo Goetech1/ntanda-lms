@@ -19,7 +19,9 @@ export const TenantBrandingProvider = ({ children }) => {
       // List of main domains that represent the central platform (no tenant resolution needed)
       const mainDomains = new Set([
         'ntandaapp.com',
-        'www.ntandaapp.com'
+        'www.ntandaapp.com',
+        'learningzm.com',
+        'www.learningzm.com'
       ]);
 
       if (mainDomains.has(hostname)) {
